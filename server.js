@@ -4,7 +4,6 @@ const { resolve } = require('path');
 const cors = require('cors');
 
 const stripe = require('stripe')(process.env.stripeTestKey);
-
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
   res.header(
@@ -37,7 +36,9 @@ app.post('/create-payment-intent', async (req, res) => {
   // res.send('Create payment intent');
 
   const { items } = req.body;
-  console.log(req.body);
+  console.log(req.body.name);
+  console.log(req.body.id);
+
   // Create a PaymentIntent with the order amount and currency
   const paymentIntent = await stripe.paymentIntents.create({
     amount: calculateOrderAmount(items),
