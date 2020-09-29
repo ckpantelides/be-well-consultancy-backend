@@ -22,11 +22,13 @@ app.use(cors());
 app.use(express.static('.'));
 app.use(express.json());
 
-const calculateOrderAmount = (items) => {
+const calculateOrderAmount = (type) => {
   // Replace this constant with a calculation of the order's amount
   // Calculate the order total on the server to prevent
   // people from directly manipulating the amount on the client
-  return 1400;
+  let price = '';
+  type === 'paperback' ? (amount = 1199) : (amount = 1999);
+  return amount;
 };
 
 app.get('/', (req, res) => res.send('Hello World!'));
@@ -38,13 +40,21 @@ app.get('/create-payment-intent', (req, res) =>
 app.post('/create-payment-intent', async (req, res) => {
   // console.log('Intent received');
   // res.send('Create payment intent');
-
+  /*
   const { items } = req.body;
   console.log(req.body);
+  console.log(items);
+*/
+  let data = Object.keys(req.body);
+  let customerDetails = JSON.parse(data[0]);
+  let cardDetails = JSON.parse(data[1]);
+  console.log(customerDetails.type);
+  console.log(cardDetails.email);
+  let bookType = customerDetails.type;
 
   // Create a PaymentIntent with the order amount and currency
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: calculateOrderAmount(items),
+    amount: calculateOrderAmount(bookType),
     currency: 'gbp',
   });
   res.send({
