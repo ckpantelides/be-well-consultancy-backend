@@ -20,6 +20,9 @@ let connString = process.env.DATABASE_URL;
 const { Pool } = require('pg');
 const pool = new Pool({
   connectionString: connString,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 app.use(bodyParser.json()); // support json encoded bodies
@@ -45,7 +48,7 @@ const calculateOrderAmount = (type) => {
   // Calculate the order total on the server to prevent
   // people from directly manipulating the amount on the client
   let price = '';
-  type === 'paperback' ? (amount = 1699) : (amount = 1499);
+  type === 'paperback' ? (amount = 1698) : (amount = 2498);
   return amount;
 };
 
