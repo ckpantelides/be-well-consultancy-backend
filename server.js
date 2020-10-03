@@ -118,6 +118,20 @@ app.post('/create-payment-intent', async (req, res) => {
     );
 });
 
+// This route is called to show the orders to the dashboard
+app.get('/orders', function (request, result) {
+  pool.query(
+    'SELECT rowid, orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read FROM orders ORDER BY rowid',
+    (err, res) => {
+      if (err) {
+        return console.log(err.message);
+      } else {
+        result.send(res.rows);
+      }
+    }
+  );
+});
+
 const PORT = process.env.PORT || 4242;
 app.listen(PORT, () => {
   console.log(`Our app is running on port ${PORT}`);
