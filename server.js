@@ -144,7 +144,9 @@ app.get('/api/secret', function (req, res) {
 // POST route to register a user
 app.post('/api/register', function (req, res) {
   const { email, password } = req.body;
-
+  console.log(email);
+  console.log(password);
+  console.log(req.body);
   // Auto generates salt and hash
   bcrypt.hash(password, saltRounds, function (err, hash) {
     if (err) {
