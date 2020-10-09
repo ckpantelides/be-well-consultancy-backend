@@ -69,9 +69,6 @@ app.post('/create-payment-intent', async (req, res) => {
   let data = Object.keys(req.body);
   let customerDetails = JSON.parse(data[0]);
   let cardDetails = JSON.parse(data[1]);
-  console.log(customerDetails.type);
-  console.log(cardDetails.email);
-  let bookType = customerDetails.type;
 
   // Add all details when payment intent created
   // Have field 'paid' and paymentintentid to track payment
@@ -80,7 +77,7 @@ app.post('/create-payment-intent', async (req, res) => {
 
   // Create a PaymentIntent with the order amount and currency
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: calculateOrderAmount(bookType),
+    amount: calculateOrderAmount(customerDetails.type),
     currency: 'gbp',
   });
   res.send({
@@ -130,6 +127,16 @@ app.get('/orders', function (request, result) {
       }
     }
   );
+});
+
+// Test route for admin login
+app.get('/api/home', function (req, res) {
+  res.send('Welcome!');
+});
+
+// Test route for admin login
+app.get('/api/secret', function (req, res) {
+  res.send('The password is potato');
 });
 
 const PORT = process.env.PORT || 4242;
