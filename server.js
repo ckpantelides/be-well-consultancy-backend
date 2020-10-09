@@ -2,6 +2,8 @@ const express = require('express');
 const app = express();
 const { resolve } = require('path');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 const bodyParser = require('body-parser');
 
@@ -137,6 +139,31 @@ app.get('/api/home', function (req, res) {
 // Test route for admin login
 app.get('/api/secret', function (req, res) {
   res.send('The password is potato');
+});
+
+// POST route to register a user
+app.post('/api/register', function (req, res) {
+  const { email, password } = req.body;
+
+  // Auto generates salt and hash
+  bcrypt.hash(password, saltRounds, function (err, hash) {
+    if (err) {
+      res.status(500).send('Error registering new user please try again.');
+    } else {
+      // Store email and password hash
+      pool
+        .query('INSERT INTO users(email, password)VALUES($1, $2)', [
+          email,
+          hash,
+        ])
+        .then(res.status(200).send('Welcome to the club!'))
+        .catch((err) =>
+          setImmediate(() => {
+            throw err;
+          })
+        );
+    }
+  });
 });
 
 const PORT = process.env.PORT || 4242;
