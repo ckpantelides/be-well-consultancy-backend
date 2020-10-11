@@ -178,9 +178,7 @@ app.post('/api/authenticate', function (req, res) {
     .query('SELECT password FROM users WHERE email = $1', [email])
     .then((result) => {
       if (result.rows.length === 0) {
-        res.status(500).json({
-          error: 'Incorrect email address',
-        });
+        console.log('Incorrect email address');
       } else {
         console.log(result.rows[0]);
         hash = result.rows[0].password;
@@ -188,20 +186,13 @@ app.post('/api/authenticate', function (req, res) {
     })
     .catch((e) => {
       console.error(e.stack);
-      res.status(500).json({
-        error: 'Internal error please try again',
-      });
     });
 
   bcrypt.compare(password, hash, function (err, same) {
     if (err) {
-      res.status(500).json({
-        error: 'Internal error please try again',
-      });
+      console.log('Error with bcrypt');
     } else if (!same) {
-      res.status(401).json({
-        error: 'Incorrect email or password',
-      });
+      console.log('Incorrect password');
     } else {
       // Issue token
       const payload = { email };
