@@ -172,8 +172,25 @@ app.post('/api/register', function (req, res) {
 
 app.post('/api/authenticate', function (req, res) {
   const { email, password } = req.body;
+  console.log(req.body);
   let hash = '';
 
+  function compare(plaintext, hashedword) {
+    bcrypt.compare(plaintext, hashedword, function (err, same) {
+      if (err) {
+        console.log('Error with bcrypt');
+      } else if (!same) {
+        console.log('Incorrect password');
+      } else {
+        // Issue token
+        const payload = { email };
+        const token = jwt.sign(payload, JWTsecret, {
+          expiresIn: '1h',
+        });
+        res.cookie('token', token, { httpOnly: true }).sendStatus(200);
+      }
+    });
+  }
   pool
     .query('SELECT password FROM users WHERE email = $1', [email])
     .then((result) => {
@@ -182,26 +199,12 @@ app.post('/api/authenticate', function (req, res) {
       } else {
         console.log(result.rows[0]);
         hash = result.rows[0].password;
+        compare(password, hash);
       }
     })
     .catch((e) => {
       console.error(e.stack);
     });
-
-  bcrypt.compare(password, hash, function (err, same) {
-    if (err) {
-      console.log('Error with bcrypt');
-    } else if (!same) {
-      console.log('Incorrect password');
-    } else {
-      // Issue token
-      const payload = { email };
-      const token = jwt.sign(payload, JWTsecret, {
-        expiresIn: '1h',
-      });
-      res.cookie('token', token, { httpOnly: true }).sendStatus(200);
-    }
-  });
 });
 
 const PORT = process.env.PORT || 4242;
