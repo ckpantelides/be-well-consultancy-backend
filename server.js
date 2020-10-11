@@ -179,8 +179,10 @@ app.post('/api/authenticate', function (req, res) {
     bcrypt.compare(plaintext, hashedword, function (err, same) {
       if (err) {
         console.log('Error with bcrypt');
+        res.end();
       } else if (!same) {
         console.log('Incorrect password');
+        res.end();
       } else {
         // Issue token
         const payload = { email };
@@ -192,14 +194,15 @@ app.post('/api/authenticate', function (req, res) {
     });
   }
   pool
-    .query('SELECT password FROM users WHERE email = $1', [email])
+    .query('SELECT password FROM users WHERE email = $1', [req.body.email])
     .then((result) => {
       if (result.rows.length === 0) {
         console.log('Incorrect email address');
+        res.end();
       } else {
         console.log(result.rows[0]);
         hash = result.rows[0].password;
-        compare(password, hash);
+        compare(req.body.password, hash);
       }
     })
     .catch((e) => {
