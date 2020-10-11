@@ -177,8 +177,10 @@ app.post('/api/authenticate', function (req, res) {
   pool
     .query('SELECT password FROM users WHERE email = $1', [email])
     .then((res) => {
-      console.log(res.rows[0].password);
-      hash = res.rows[0].password;
+      console.log(res.rows);
+      console.log(res.rows.password);
+      //  console.log(res.rows[0].password);
+      hash = res.rows.password;
     })
     .catch((e) => {
       console.error(e.stack);
