@@ -176,14 +176,14 @@ app.post('/api/authenticate', function (req, res) {
 
   pool
     .query('SELECT password FROM users WHERE email = $1', [email])
-    .then((res) => {
-      if (res.rows.length === 0) {
+    .then((result) => {
+      if (result.rows.length === 0) {
         res.status(500).json({
           error: 'Incorrect email address',
         });
       } else {
-        console.log(res.rows[0]);
-        hash = res.rows[0].password;
+        console.log(result.rows[0]);
+        hash = result.rows[0].password;
       }
     })
     .catch((e) => {
@@ -192,6 +192,7 @@ app.post('/api/authenticate', function (req, res) {
         error: 'Internal error please try again',
       });
     });
+
   bcrypt.compare(password, hash, function (err, same) {
     if (err) {
       res.status(500).json({
