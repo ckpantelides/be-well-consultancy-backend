@@ -177,37 +177,39 @@ app.post('/api/authenticate', function (req, res) {
   pool
     .query('SELECT password FROM users WHERE email = $1', [email])
     .then((res) => {
-      let result = res.rows[0];
-      console.log(result);
-      console.log(result.password);
-      console.log(res);
-      hash = result.password;
+      if (res.rows.length === 0) {
+        res.status(500).json({
+          error: 'Incorrect email address',
+        });
+      } else {
+        console.log(res.rows[0]);
+        hash = res.rows[0].password;
+      }
     })
     .catch((e) => {
       console.error(e.stack);
       res.status(500).json({
         error: 'Internal error please try again',
       });
-
-      bcrypt.compare(password, hash, function (err, same) {
-        if (err) {
-          res.status(500).json({
-            error: 'Internal error please try again',
-          });
-        } else if (!same) {
-          res.status(401).json({
-            error: 'Incorrect email or password',
-          });
-        } else {
-          // Issue token
-          const payload = { email };
-          const token = jwt.sign(payload, JWTsecret, {
-            expiresIn: '1h',
-          });
-          res.cookie('token', token, { httpOnly: true }).sendStatus(200);
-        }
-      });
     });
+  bcrypt.compare(password, hash, function (err, same) {
+    if (err) {
+      res.status(500).json({
+        error: 'Internal error please try again',
+      });
+    } else if (!same) {
+      res.status(401).json({
+        error: 'Incorrect email or password',
+      });
+    } else {
+      // Issue token
+      const payload = { email };
+      const token = jwt.sign(payload, JWTsecret, {
+        expiresIn: '1h',
+      });
+      res.cookie('token', token, { httpOnly: true }).sendStatus(200);
+    }
+  });
 });
 
 const PORT = process.env.PORT || 4242;
