@@ -10,6 +10,10 @@ const bodyParser = require('body-parser');
 // Used to generate order IDs
 const shortid = require('shortid');
 
+// Web tokens will be used to authenticate admin
+const jwt = require('jsonwebtoken');
+const JWTsecret = process.env.JWTsecret;
+
 // pg is the module used for node to interact with postgresql
 let pg = require('pg');
 if (process.env.DATABASE_URL) {
@@ -144,9 +148,7 @@ app.get('/api/secret', function (req, res) {
 // POST route to register a user
 app.post('/api/register', function (req, res) {
   const { email, password } = req.body;
-  console.log(email);
-  console.log(password);
-  console.log(req.body);
+
   // Auto generates salt and hash
   bcrypt.hash(password, saltRounds, function (err, hash) {
     if (err) {
@@ -166,6 +168,43 @@ app.post('/api/register', function (req, res) {
         );
     }
   });
+});
+
+app.post('/api/authenticate', function (req, res) {
+  const { email, password } = req.body;
+  let hash = '';
+
+  pool
+    .query('SELECT password FROM users WHERE email = $1', [email])
+    .then((res) => {
+      console.log(res.rows[0]);
+      hash = res.rows[0];
+    })
+    .catch((e) => {
+      console.error(e.stack);
+      res.status(500).json({
+        error: 'Internal error please try again',
+      });
+
+      bcrypt.compare(password, hash, function (err, same) {
+        if (err) {
+          res.status(500).json({
+            error: 'Internal error please try again',
+          });
+        } else if (!same) {
+          res.status(401).json({
+            error: 'Incorrect email or password',
+          });
+        } else {
+          // Issue token
+          const payload = { email };
+          const token = jwt.sign(payload, JWTsecret, {
+            expiresIn: '1h',
+          });
+          res.cookie('token', token, { httpOnly: true }).sendStatus(200);
+        }
+      });
+    });
 });
 
 const PORT = process.env.PORT || 4242;

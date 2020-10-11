@@ -13,4 +13,4 @@ CREATE TABLE users(rowid SERIAL PRIMARY KEY,email VARCHAR(50) UNIQUE,password VA
 DROP TABLE tablename; // Delete table
 TABLE tablename; // View tablename's data in CLI
 
-Invoke-RestMethod -Method 'Post' -Uri 'https://storybook-backend.herokuapp.com/api/register' -ContentType application/json -Body (@{"email"="ckpantelides","password"="camel3Hoops5"}|ConvertTo-Json)
+Used Postman website to register user. Used 'raw' then JSON to send
