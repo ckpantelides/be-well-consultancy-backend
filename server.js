@@ -179,6 +179,8 @@ app.post('/api/authenticate', function (req, res) {
     .then((res) => {
       let result = res.rows[0];
       console.log(result);
+      console.log(result.password);
+      console.log(res);
       hash = result.password;
     })
     .catch((e) => {
