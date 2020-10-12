@@ -172,17 +172,16 @@ app.post('/api/register', function (req, res) {
 
 app.post('/api/authenticate', function (req, res) {
   const { email, password } = req.body;
-  console.log(req.body);
   let hash = '';
 
-  function compare(plaintext, hashedword) {
+  function comparePassword(plaintext, hashedword) {
     bcrypt.compare(plaintext, hashedword, function (err, same) {
       if (err) {
         console.log('Error with bcrypt');
-        res.end();
+        res.status(500).json({ error: 'Internal error please try again'});
       } else if (!same) {
         console.log('Incorrect password');
-        res.end();
+        res.status(401).json({ error: 'Incorrect email or password'});
       } else {
         // Issue token
         const payload = { email };
@@ -194,19 +193,20 @@ app.post('/api/authenticate', function (req, res) {
     });
   }
   pool
-    .query('SELECT password FROM users WHERE email = $1', [req.body.email])
+    .query('SELECT password FROM users WHERE email = $1', [email])
     .then((result) => {
       if (result.rows.length === 0) {
         console.log('Incorrect email address');
-        res.end();
+        res.status(401).json({ error: 'Incorrect email or password'});
       } else {
         console.log(result.rows[0]);
         hash = result.rows[0].password;
-        compare(req.body.password, hash);
+        comparePassword(password, hash);
       }
     })
     .catch((e) => {
       console.error(e.stack);
+      res.status(500).json({ error: 'Internal error please try again'});
     });
 });
 
