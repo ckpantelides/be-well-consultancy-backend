@@ -188,7 +188,7 @@ app.post('/api/authenticate', function (req, res) {
         const token = jwt.sign(payload, JWTsecret, {
           expiresIn: '1h',
         });
-        res.cookie('token', token, { httpOnly: true }).sendStatus(200).json({ success: 'Token issued'});;
+        res.cookie('token', token, { httpOnly: true }).sendStatus(200).send('Token issued');
       }
     });
   }
