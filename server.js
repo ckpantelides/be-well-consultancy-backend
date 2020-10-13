@@ -64,7 +64,8 @@ const calculateOrderAmount = (type) => {
 };
 
 // Enable pre-flight requests for routes with credentials
-app.options('*', cors()) 
+// TODO enable for only authenticate and secret routes?
+app.options('*', cors(corsOptions)) 
 
 app.get('/', cors(), (req, res) => res.send('Hello World!'));
 
