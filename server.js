@@ -14,6 +14,10 @@ const shortid = require('shortid');
 const jwt = require('jsonwebtoken');
 const JWTsecret = process.env.JWTsecret;
 
+// Cookie parser ensures only users with web token can access protected routes
+const cookieParser = require('cookie-parser');
+const withAuth = require('./middleware'); // Checks token from user is valid
+
 // pg is the module used for node to interact with postgresql
 let pg = require('pg');
 if (process.env.DATABASE_URL) {
@@ -33,6 +37,7 @@ const pool = new Pool({
 
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support urlencoded bodies
+app.use(cookieParser());
 
 const stripe = require('stripe')(process.env.stripeTestKey);
 app.use(function (req, res, next) {
@@ -141,7 +146,7 @@ app.get('/api/home', function (req, res) {
 });
 
 // Test route for admin login
-app.get('/api/secret', function (req, res) {
+app.get('/api/secret', withAuth, function (req, res) {
   res.send('The password is potato');
 });
 
