@@ -40,6 +40,8 @@ app.use(bodyParser.urlencoded({ extended: true })); // support urlencoded bodies
 app.use(cookieParser());
 
 const stripe = require('stripe')(process.env.stripeTestKey);
+
+/* Wildcare header needed for most routes. Disabled to test authentication
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
   res.header(
@@ -48,6 +50,7 @@ app.use(function (req, res, next) {
   );
   next();
 });
+*/
 
 // Options to allow cookies for authentication from dev front-end
 let corsOptions = {
