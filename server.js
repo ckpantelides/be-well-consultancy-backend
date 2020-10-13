@@ -63,6 +63,9 @@ const calculateOrderAmount = (type) => {
   return amount;
 };
 
+// Enable pre-flight requests for routes with credentials
+app.options('*', cors()) 
+
 app.get('/', cors(), (req, res) => res.send('Hello World!'));
 
 app.get('/create-payment-intent', cors(), (req, res) =>
