@@ -51,7 +51,7 @@ app.use(function (req, res, next) {
 
 // Options to allow cookies for authentication from dev front-end
 let corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: 'https://ckpantelides.github.io/',
   credentials:  true
 }
 
