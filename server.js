@@ -41,6 +41,7 @@ app.use(cookieParser());
 
 const stripe = require('stripe')(process.env.stripeTestKey);
 
+/*
 let whitelist = ['https://ckpantelides.github.io', 'http://localhost:3000']
 var corsOptions = {
   origin: function (origin, callback) {
@@ -49,9 +50,9 @@ var corsOptions = {
     } else {
       callback(new Error('Not allowed by CORS'))
     }
-  }, 
-  credentials: true
+  }
 }
+*/
 
 app.use(express.static('.'));
 app.use(express.json());
@@ -143,17 +144,23 @@ app.get('/orders', cors(corsOptions), function (request, response) {
 });
 
 // Test route for admin login
-app.get('/api/home', cors(corsOptions), function (req, res) {
+app.get('/api/home',function (req, res) {
+  res.set('Access-Control-Allow-Origin', 'https://ckpantelides.github.io')
+  res.set('Access-Control-Allow-Credentials', 'true')
   res.send('Welcome!');
 });
 
 // Test route for admin login
-app.get('/api/secret', [cors(corsOptions), withAuth], function (req, res) {
+app.get('/api/secret', withAuth, function (req, res) {
+  res.set('Access-Control-Allow-Origin', 'https://ckpantelides.github.io')
+  res.set('Access-Control-Allow-Credentials', 'true')
   res.send('The password is potato');
 });
 
 // Route for the front-end to check it has a valid token
-app.get('/checkToken', [cors(corsOptions), withAuth], function(req, res) {
+app.get('/checkToken', withAuth, function(req, res) {
+  res.set('Access-Control-Allow-Origin', 'https://ckpantelides.github.io')
+  res.set('Access-Control-Allow-Credentials', 'true')
   res.sendStatus(200);
 });
 
@@ -182,7 +189,9 @@ app.post('/api/register', function (req, res) {
   });
 });
 
-app.post('/api/authenticate', cors(corsOptions), function (req, res) {
+app.post('/api/authenticate', function (req, res) {
+  res.set('Access-Control-Allow-Origin', 'https://ckpantelides.github.io')
+  res.set('Access-Control-Allow-Credentials', 'true')
   const { email, password } = req.body;
   let hash = '';
 
