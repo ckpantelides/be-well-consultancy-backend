@@ -18,13 +18,6 @@ const JWTsecret = process.env.JWTsecret;
 const cookieParser = require('cookie-parser');
 const withAuth = require('./middleware'); // Checks token from user is valid
 
-app.use(
-  cors({
-    origin: 'https://ckpantelides.github.io/duckduck-admin',
-    credentials: true,
-  })
-);
-
 // pg is the module used for node to interact with postgresql
 let pg = require('pg');
 if (process.env.DATABASE_URL) {
@@ -46,9 +39,6 @@ app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support urlencoded bodies
 app.use(cookieParser());
 
-const stripe = require('stripe')(process.env.stripeTestKey);
-
-/*
 let whitelist = ['https://ckpantelides.github.io', 'http://localhost:3000']
 var corsOptions = {
   origin: function (origin, callback) {
@@ -59,7 +49,6 @@ var corsOptions = {
     }
   }
 }
-*/
 
 app.use(express.static('.'));
 app.use(express.json());
@@ -75,11 +64,11 @@ const calculateOrderAmount = (type) => {
 
 app.get('/', cors(), (req, res) => res.send('Hello World!'));
 
-app.get('/create-payment-intent', (req, res) =>
+app.get('/create-payment-intent', cors(), (req, res) =>
   res.send('Create payment intent')
 );
 
-app.post('/create-payment-intent', async (req, res) => {
+app.post('/create-payment-intent', cors(), async (req, res) => {
   // console.log('Intent received');
   // res.send('Create payment intent');
   /*
@@ -137,7 +126,7 @@ app.post('/create-payment-intent', async (req, res) => {
 });
 
 // This route is called to show the orders to the dashboard
-app.get('/orders', function (request, response) {
+app.get('/orders', cors(corsOptions), function (request, response) {
   pool.query(
     'SELECT rowid, orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read FROM orders ORDER BY rowid',
     (err, res) => {
@@ -151,17 +140,17 @@ app.get('/orders', function (request, response) {
 });
 
 // Test route for admin login
-app.get('/api/home',function (req, res) {
+app.get('/api/home', cors(corsOptions), function (req, res) {
   res.send('Welcome!');
 });
 
 // Test route for admin login
-app.get('/api/secret', withAuth, function (req, res) {
+app.get('/api/secret', [cors(corsOptions), withAuth], function (req, res) {
   res.send('The password is potato');
 });
 
 // Route for the front-end to check it has a valid token
-app.get('/checkToken', withAuth, function(req, res) {
+app.get('/checkToken', [cors(corsOptions), withAuth], function(req, res) {
   res.sendStatus(200);
 });
 
@@ -190,7 +179,7 @@ app.post('/api/register', function (req, res) {
   });
 });
 
-app.post('/api/authenticate', function (req, res) {
+app.post('/api/authenticate', cors(corsOptions), function (req, res) {
   const { email, password } = req.body;
   let hash = '';
 
