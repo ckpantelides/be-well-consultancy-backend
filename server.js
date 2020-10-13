@@ -41,19 +41,9 @@ app.use(cookieParser());
 
 const stripe = require('stripe')(process.env.stripeTestKey);
 
-/* Wildcare header needed for most routes. Disabled to test authentication
-app.use(function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept'
-  );
-  next();
-});
-*/
-var allowlist = ['https://ckpantelides.github.io', 'http://localhost:3000']
-var corsOptionsDelegate = function (req, callback) {
-  var corsOptions;
+let allowlist = ['https://ckpantelides.github.io', 'http://localhost:3000']
+let corsOptionsDelegate = function (req, callback) {
+  let corsOptions;
   if (allowlist.indexOf(req.header('Origin')) !== -1) {
     // reflect (enable) the requested origin in the CORS response
     corsOptions = { 
@@ -65,16 +55,6 @@ var corsOptionsDelegate = function (req, callback) {
   }
   callback(null, corsOptions) // callback expects two parameters: error and options
 }
-/*
-// Options to allow cookies for authentication from dev front-end
-let corsOptions = {
-  origin: true,
-  credentials:  true
-} */
-
-// app.use(cors(corsOptions))
-
-//app.use(cors());
 
 app.use(express.static('.'));
 app.use(express.json());
@@ -88,13 +68,13 @@ const calculateOrderAmount = (type) => {
   return amount;
 };
 
-app.get('/', (req, res) => res.send('Hello World!'));
+app.get('/', cors(), (req, res) => res.send('Hello World!'));
 
-app.get('/create-payment-intent', (req, res) =>
+app.get('/create-payment-intent', cors(), (req, res) =>
   res.send('Create payment intent')
 );
 
-app.post('/create-payment-intent', async (req, res) => {
+app.post('/create-payment-intent', cors(), async (req, res) => {
   // console.log('Intent received');
   // res.send('Create payment intent');
   /*
@@ -152,7 +132,7 @@ app.post('/create-payment-intent', async (req, res) => {
 });
 
 // This route is called to show the orders to the dashboard
-app.get('/orders', function (request, result) {
+app.get('/orders', cors(corsOptionsDelegate), function (request, result) {
   pool.query(
     'SELECT rowid, orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read FROM orders ORDER BY rowid',
     (err, res) => {
@@ -166,7 +146,7 @@ app.get('/orders', function (request, result) {
 });
 
 // Test route for admin login
-app.get('/api/home', function (req, res) {
+app.get('/api/home', cors(corsOptionsDelegate), function (req, res) {
   res.send('Welcome!');
 });
 
