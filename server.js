@@ -202,7 +202,7 @@ app.post('/api/authenticate', cors(corsOptions), function (req, res) {
         const token = jwt.sign(payload, JWTsecret, {
           expiresIn: '1h',
         });
-        res.cookie('token', token, { httpOnly: true, sameSite: 'none' }).status(200).send('Token issued');
+        res.cookie('token', token, { httpOnly: true, sameSite: 'none', secure: true }).status(200).send('Token issued');
       }
     });
   }
