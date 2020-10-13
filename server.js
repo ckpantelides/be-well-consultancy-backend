@@ -41,7 +41,7 @@ app.use(cookieParser());
 
 const stripe = require('stripe')(process.env.stripeTestKey);
 
-let allowlist = ['https://ckpantelides.github.io', 'http://localhost:3000']
+let whitelist = ['https://ckpantelides.github.io', 'http://localhost:3000']
 var corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1) {
