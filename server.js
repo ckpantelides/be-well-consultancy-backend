@@ -150,6 +150,11 @@ app.get('/api/secret', withAuth, function (req, res) {
   res.send('The password is potato');
 });
 
+// Route for the front-end to check it has a valid token
+app.get('/checkToken', withAuth, function(req, res) {
+  res.sendStatus(200);
+});
+
 // POST route to register a user
 app.post('/api/register', function (req, res) {
   const { email, password } = req.body;
