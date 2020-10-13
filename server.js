@@ -51,14 +51,28 @@ app.use(function (req, res, next) {
   next();
 });
 */
-
+var allowlist = ['https://ckpantelides.github.io', 'http://localhost:3000']
+var corsOptionsDelegate = function (req, callback) {
+  var corsOptions;
+  if (allowlist.indexOf(req.header('Origin')) !== -1) {
+    // reflect (enable) the requested origin in the CORS response
+    corsOptions = { 
+     origin: true,
+     credentials:  true
+    } 
+  } else {
+    corsOptions = { origin: false } // disable CORS for this request
+  }
+  callback(null, corsOptions) // callback expects two parameters: error and options
+}
+/*
 // Options to allow cookies for authentication from dev front-end
 let corsOptions = {
-  origin: 'https://ckpantelides.github.io/',
+  origin: true,
   credentials:  true
-}
+} */
 
-app.use(cors(corsOptions))
+// app.use(cors(corsOptions))
 
 //app.use(cors());
 
@@ -157,12 +171,12 @@ app.get('/api/home', function (req, res) {
 });
 
 // Test route for admin login
-app.get('/api/secret', withAuth, function (req, res) {
+app.get('/api/secret', cors(corsOptionsDelegate), withAuth, function (req, res) {
   res.send('The password is potato');
 });
 
 // Route for the front-end to check it has a valid token
-app.get('/checkToken', withAuth, function(req, res) {
+app.get('/checkToken', cors(corsOptionsDelegate), withAuth, function(req, res) {
   res.sendStatus(200);
 });
 
@@ -191,7 +205,7 @@ app.post('/api/register', function (req, res) {
   });
 });
 
-app.post('/api/authenticate', function (req, res) {
+app.post('/api/authenticate', cors(corsOptionsDelegate), function (req, res) {
   const { email, password } = req.body;
   let hash = '';
 
