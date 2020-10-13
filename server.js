@@ -49,7 +49,15 @@ app.use(function (req, res, next) {
   next();
 });
 
-app.use(cors());
+// Options to allow cookies for authentication from dev front-end
+let corsOptions = {
+  origin: 'http://localhost:3000',
+  credentials:  true
+}
+
+app.use(cors(corsOptions))
+
+//app.use(cors());
 
 app.use(express.static('.'));
 app.use(express.json());
