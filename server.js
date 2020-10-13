@@ -148,12 +148,12 @@ app.get('/api/home', cors(corsOptions), function (req, res) {
 });
 
 // Test route for admin login
-app.get('/api/secret', cors(corsOptions), withAuth, function (req, res) {
+app.get('/api/secret', [cors(corsOptions), withAuth], function (req, res) {
   res.send('The password is potato');
 });
 
 // Route for the front-end to check it has a valid token
-app.get('/checkToken', cors(corsOptions), withAuth, function(req, res) {
+app.get('/checkToken', [cors(corsOptions), withAuth], function(req, res) {
   res.sendStatus(200);
 });
 
