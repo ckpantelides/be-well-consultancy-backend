@@ -18,6 +18,13 @@ const JWTsecret = process.env.JWTsecret;
 const cookieParser = require('cookie-parser');
 const withAuth = require('./middleware'); // Checks token from user is valid
 
+app.use(
+  cors({
+    origin: 'https://ckpantelides.github.io/duckduck-admin',
+    credentials: true,
+  })
+);
+
 // pg is the module used for node to interact with postgresql
 let pg = require('pg');
 if (process.env.DATABASE_URL) {
@@ -68,11 +75,11 @@ const calculateOrderAmount = (type) => {
 
 app.get('/', cors(), (req, res) => res.send('Hello World!'));
 
-app.get('/create-payment-intent', cors(), (req, res) =>
+app.get('/create-payment-intent', (req, res) =>
   res.send('Create payment intent')
 );
 
-app.post('/create-payment-intent', cors(), async (req, res) => {
+app.post('/create-payment-intent', async (req, res) => {
   // console.log('Intent received');
   // res.send('Create payment intent');
   /*
@@ -130,7 +137,7 @@ app.post('/create-payment-intent', cors(), async (req, res) => {
 });
 
 // This route is called to show the orders to the dashboard
-app.get('/orders', cors(corsOptions), function (request, response) {
+app.get('/orders', function (request, response) {
   pool.query(
     'SELECT rowid, orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read FROM orders ORDER BY rowid',
     (err, res) => {
@@ -145,22 +152,16 @@ app.get('/orders', cors(corsOptions), function (request, response) {
 
 // Test route for admin login
 app.get('/api/home',function (req, res) {
-  res.set('Access-Control-Allow-Origin', 'https://ckpantelides.github.io')
-  res.set('Access-Control-Allow-Credentials', 'true')
   res.send('Welcome!');
 });
 
 // Test route for admin login
 app.get('/api/secret', withAuth, function (req, res) {
-  res.set('Access-Control-Allow-Origin', 'https://ckpantelides.github.io')
-  res.set('Access-Control-Allow-Credentials', 'true')
   res.send('The password is potato');
 });
 
 // Route for the front-end to check it has a valid token
 app.get('/checkToken', withAuth, function(req, res) {
-  res.set('Access-Control-Allow-Origin', 'https://ckpantelides.github.io')
-  res.set('Access-Control-Allow-Credentials', 'true')
   res.sendStatus(200);
 });
 
@@ -190,8 +191,6 @@ app.post('/api/register', function (req, res) {
 });
 
 app.post('/api/authenticate', function (req, res) {
-  res.set('Access-Control-Allow-Origin', 'https://ckpantelides.github.io')
-  res.set('Access-Control-Allow-Credentials', 'true')
   const { email, password } = req.body;
   let hash = '';
 
