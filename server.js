@@ -7,6 +7,9 @@ const saltRounds = 10;
 
 const bodyParser = require('body-parser');
 
+// Stripe handles payments for physical books via create-payment-intent
+const stripe = require('stripe')(process.env.stripeTestKey);
+
 // Used to generate order IDs
 const shortid = require('shortid');
 
