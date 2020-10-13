@@ -63,10 +63,12 @@ const calculateOrderAmount = (type) => {
   return amount;
 };
 
-// Enable pre-flight requests for routes with credentials
-// TODO enable for only authenticate and secret routes?
-app.options(['/authenticate', '/secret', '/orders', '/home', '/checktoken'], cors(corsOptions)) 
-app.options(['/create-payment-intent', '/register'], cors())
+// Pre-flight requests for api routes from whitelist only
+app.options('/api/', cors(corsOptions)); 
+
+// Pre-flight requests for payment and TEMPORARILY register allowed from all origins
+app.options('/create-payment-intent', cors());
+app.options('/register', cors());
 
 app.get('/', cors(), (req, res) => res.send('Hello World!'));
 
@@ -156,12 +158,12 @@ app.get('/api/secret', [cors(corsOptions), withAuth], function (req, res) {
 });
 
 // Route for the front-end to check it has a valid token
-app.get('/checkToken', [cors(corsOptions), withAuth], function(req, res) {
+app.get('/api/checkToken', [cors(corsOptions), withAuth], function(req, res) {
   res.sendStatus(200);
 });
 
 // POST route to register a user
-app.post('/api/register', function (req, res) {
+app.post('/register', function (req, res) {
   const { email, password } = req.body;
 
   // Auto generates salt and hash
