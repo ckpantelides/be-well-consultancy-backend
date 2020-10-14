@@ -69,7 +69,8 @@ const calculateOrderAmount = (type) => {
 // Pre-flight requests for api routes from whitelist only
 app.options('/api/authenticate', cors(corsOptions));
 app.options('/api/secret', cors(corsOptions)); 
-app.options('/api/checkToken', cors(corsOptions)); 
+app.options('/api/checkToken', cors(corsOptions));
+app.options('/orders', cors(corsOptions)); 
 
 // Pre-flight requests for payment and TEMPORARILY register allowed from all origins
 app.options('/create-payment-intent', cors());
