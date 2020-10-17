@@ -51,7 +51,8 @@ var corsOptions = {
       callback(new Error('Not allowed by CORS'))
     }
   },
-  credentials: true
+  credentials: true,
+  method: 'GET,POST'
 }
 
 app.use(express.static('.'));
