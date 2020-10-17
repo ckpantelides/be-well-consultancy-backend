@@ -141,7 +141,7 @@ app.post('/create-payment-intent', cors(), async (req, res) => {
 });
 
 // This route is called to show the orders to the dashboard
-app.get('/orders', cors(corsOptions), function (request, response) {
+app.get('/orders', [cors(corsOptions), withAuth], function (request, response) {
   pool.query(
     'SELECT rowid, orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read FROM orders ORDER BY rowid',
     (err, res) => {
@@ -154,7 +154,7 @@ app.get('/orders', cors(corsOptions), function (request, response) {
   );
 });
 
-app.post('/update-orders'), cors(corsOptions), function (request, response) {
+app.post('/update-orders'), [cors(corsOptions), withAuth], function (request, response) {
    // set data to the updated enquiries received from the frontend
    console.log(request.body);
    const data = request.body.data;
