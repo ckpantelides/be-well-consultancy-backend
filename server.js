@@ -156,7 +156,8 @@ app.get('/orders', cors(corsOptions), function (request, response) {
 
 app.post('update-orders'), cors(corsOptions), function (request, response) {
    // set data to the updated enquiries received from the frontend
-   const data = req.body.data;
+   console.log(request.body);
+   const data = request.body.data;
 
    // iterate over the updated enquiry data and insert into requests table
    function updateEnquiries() {
@@ -207,7 +208,7 @@ app.post('update-orders'), cors(corsOptions), function (request, response) {
        updateEnquiries();
      }
    });
-   res.end();
+   response.end();
 }
 
 // Test route for admin login
