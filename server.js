@@ -71,6 +71,7 @@ app.options('/api/authenticate', cors(corsOptions));
 app.options('/api/secret', cors(corsOptions)); 
 app.options('/api/checkToken', cors(corsOptions));
 app.options('/orders', cors(corsOptions)); 
+app.options('/update-orders', cors(corsOptions)); 
 
 // Pre-flight requests for payment and TEMPORARILY register allowed from all origins
 app.options('/create-payment-intent', cors());
@@ -153,14 +154,70 @@ app.get('/orders', cors(corsOptions), function (request, response) {
   );
 });
 
+app.post('update-orders'), cors(corsOptions), function (request, response) {
+   // set data to the updated enquiries received from the frontend
+   const data = req.body.data;
+
+   // iterate over the updated enquiry data and insert into requests table
+   function updateEnquiries() {
+     data.forEach(function(el, index) {
+       // rowid is reset to account for orders being deleted on the front-end
+       let rowid = index + 1;
+ 
+       // insert updated enquiry data into requests table
+       pool
+         .query(
+          'INSERT INTO orders(rowid, orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)'           [
+             el.rowid,
+             el.orderid,
+             el.date,
+             el.delname,
+             el.email,
+             el.address,
+             el.postcode,
+             el.type,
+             el.story,
+             el.charname,
+             el.avatar, 
+             el.brand, 
+             el.last4, 
+             el.paymentintentid, 
+             el.paid, 
+             el.read
+           ]
+         )
+         .catch(err =>
+           setImmediate(() => {
+             throw err;
+           })
+         );
+     });
+   }
+ 
+   // this will be used in the query below to set the primary key to data.length + 1
+   let resetPrimaryKey = `SELECT setval('requests_rowid_seq', ${data.length}, true);`;
+ 
+   // deletes all rows from the requests table and then calls updateEnquiries()
+   // this is necessary to reset the rowids, to account for reodered enquiries
+   pool.query('TRUNCATE TABLE orders', function(err) {
+     if (err) {
+       return console.error(err.message);
+     } else {
+       pool.query(resetPrimaryKey);
+       updateEnquiries();
+     }
+   });
+   res.end();
+}
+
 // Test route for admin login
 app.get('/api/home', cors(corsOptions), function (req, res) {
-  res.send('Welcome!');
+  res.send("The server's up and running");
 });
 
 // Test route for admin login
 app.get('/api/secret', [cors(corsOptions), withAuth], function (req, res) {
-  res.send('The password is potato');
+  res.send('Christos is the best');
 });
 
 // Route for the front-end to check it has a valid token
