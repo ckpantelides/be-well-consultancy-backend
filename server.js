@@ -72,7 +72,7 @@ app.options('/api/authenticate', cors(corsOptions));
 app.options('/api/secret', cors(corsOptions)); 
 app.options('/api/checkToken', cors(corsOptions));
 app.options('/orders', cors(corsOptions)); 
-app.options('/update-orders', cors(corsOptions)); 
+app.options('/updateOrders', cors(corsOptions)); 
 
 // Pre-flight requests for payment and TEMPORARILY register allowed from all origins
 app.options('/create-payment-intent', cors());
@@ -155,7 +155,7 @@ app.get('/orders', [cors(corsOptions), withAuth], function (request, response) {
   );
 });
 
-app.post('/update-orders'), [cors(corsOptions), withAuth], function (request, response) {
+app.post('/updateOrders'), [cors(corsOptions), withAuth], function (request, response) {
    // set data to the updated enquiries received from the frontend
    console.log(request.body);
    const data = request.body.data;
@@ -209,7 +209,6 @@ app.post('/update-orders'), [cors(corsOptions), withAuth], function (request, re
        updateEnquiries();
      }
    });
-   response.end();
 }
 
 // Test route for admin login
