@@ -176,22 +176,19 @@ app.get('/orders', [cors(corsOptions), withAuth], function (request, response) {
 
 app.post('/update', cors(corsOptions2), function (request, response) {
    // set data to the updated enquiries received from the frontend
-  console.log(request.body);
-  response.sendStatus(200);
-   /*
-   const data = request.body.data;
+   const data = request.body;
 
    // iterate over the updated enquiry data and insert into requests table
    function updateEnquiries() {
      data.forEach(function(el, index) {
        // rowid is reset to account for orders being deleted on the front-end
-       let rowid = index + 1;
+       let newRowid = index + 1;
  
        // insert updated enquiry data into requests table
        pool
          .query(
           'INSERT INTO orders(rowid, orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)'           [
-             el.rowid,
+             newRowid,
              el.orderid,
              el.date,
              el.delname,
@@ -230,7 +227,6 @@ app.post('/update', cors(corsOptions2), function (request, response) {
        updateEnquiries();
      }
    });
-   */
 });
 
 // Test route for admin login
