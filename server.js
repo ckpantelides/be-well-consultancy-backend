@@ -182,22 +182,21 @@ app.post('/update', cors(corsOptions2), function (request, response) {
   
    // deletes all rows from the requests table and then calls updateEnquiries()
    // this is necessary to reset the rowids, to account for reodered enquiries
-   pool.query('TRUNCATE TABLE orders', function(err) {
+  pool.query('TRUNCATE TABLE orders', function(err) {
     if (err) {
       return console.error(err.message);
      } else {
-      updateEnquiries();
+      updateEnquiries(data);
       response.sendStatus(200);
       }
-    });
+  });
    // iterate over the updated enquiry data and insert into requests table
-   function updateEnquiries() {
-     data.forEach(el => { 
-       // insert updated enquiry data into requests table
+   function updateEnquiries(array) {
+     if (array != null && array != 'undefined') {
+     array.forEach(el => { 
        pool
          .query(
-          'INSERT INTO orders(rowid, orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)' [
-            el.rowid,
+          'INSERT INTO orders(orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)' [
             el.orderid,
             el.date,
             el.delname,
@@ -222,6 +221,7 @@ app.post('/update', cors(corsOptions2), function (request, response) {
          );
      });
    }
+  }
 });
 
 // Test route for admin login
