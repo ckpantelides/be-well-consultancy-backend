@@ -209,7 +209,7 @@ app.post('/update', cors(corsOptions2), function (request, response) {
           el.avatar,
           el.brand,
           el.last4,
-          el.paymentid,
+          el.paymentintentid,
           el.paid,
           el.read,
         ]
