@@ -58,7 +58,7 @@ var corsOptions = {
 let corsOptions2 = {
   origin: "https://ckpantelides.github.io",
   methods: 'DELETE, POST, GET, OPTIONS',
-  allowedHeaders: 'Content-Type,Authorization,Access-Control-Allow-Headers,X-Requested-With',
+  allowedHeaders: 'Content-Type,Authorization,X-Requested-With',
   credentials: true,
   preflightContinue: true,
   optionsSuccessStatus: 200
@@ -77,7 +77,9 @@ const calculateOrderAmount = (type) => {
 };
 
 // Pre-flight requests for api routes from whitelist only
-app.options('/update', cors(corsOptions2)); 
+app.options('/update', cors(corsOptions2), function (req, res) {
+  res.sendStatus(200)}); 
+
 app.options('/api/authenticate', cors(corsOptions));
 app.options('/api/secret', cors(corsOptions)); 
 app.options('/api/checkToken', cors(corsOptions));
