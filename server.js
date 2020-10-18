@@ -178,9 +178,21 @@ app.post('/update', cors(corsOptions2), function (request, response) {
    // set data to the updated enquiries received from the frontend
   const data = request.body;
   console.log(data);
+
+  
+   // deletes all rows from the requests table and then calls updateEnquiries()
+   // this is necessary to reset the rowids, to account for reodered enquiries
+   pool.query('TRUNCATE TABLE orders', function(err) {
+    if (err) {
+      return console.error(err.message);
+     } else {
+      updateEnquiries();
+      response.sendStatus(200);
+      }
+    });
    // iterate over the updated enquiry data and insert into requests table
-   function updateEnquiries(array) {
-     array.forEach(el => { 
+   function updateEnquiries() {
+     data.forEach(el => { 
        // insert updated enquiry data into requests table
        pool
          .query(
@@ -210,17 +222,6 @@ app.post('/update', cors(corsOptions2), function (request, response) {
          );
      });
    }
- 
-   // deletes all rows from the requests table and then calls updateEnquiries()
-   // this is necessary to reset the rowids, to account for reodered enquiries
-   pool.query('TRUNCATE TABLE orders', function(err) {
-     if (err) {
-       return console.error(err.message);
-     } else {
-       updateEnquiries(data);
-     }
-   });
-   res.sendStatus(200);
 });
 
 // Test route for admin login
