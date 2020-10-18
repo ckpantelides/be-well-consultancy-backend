@@ -57,7 +57,8 @@ var corsOptions = {
 
 let corsOptions2 = {
   origin: "https://ckpantelides.github.io",
-  allowedHeaders: 'Content-Type,Authorization',
+  methods: 'DELETE, POST, GET, OPTIONS',
+  allowedHeaders: 'Content-Type,Authorization,Access-Control-Allow-Headers, X-Requested-With',
   credentials: true,
   preflightContinue: true
 }
