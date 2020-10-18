@@ -41,6 +41,10 @@ const pool = new Pool({
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support urlencoded bodies
 app.use(cookieParser());
+app.use(require('body-parser').text({type: '*/*'})); // required for Stripe webook root
+
+// Stripe webhook secret
+const endpointSecret = process.env.webhookSecret;
 
 let whitelist = ['https://ckpantelides.github.io']
 var corsOptions = {
@@ -159,6 +163,37 @@ app.post('/create-payment-intent', cors(), async (req, res) => {
         throw err;
       })
     );
+});
+
+// Webhook route confirms with Stripe that a payment intent succeeded
+app.post('/webhook', function(request, response) {
+  const sig = request.headers['stripe-signature'];
+  const body = request.body;
+
+  let event = null;
+
+  try {
+    event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+  } catch (err) {
+    // invalid signature
+    response.status(400).end();
+    return;
+  }
+
+  let intent = null;
+  switch (event['type']) {
+    case 'payment_intent.succeeded':
+      intent = event.data.object;
+      console.log("Succeeded:", intent.id);
+      break;
+    case 'payment_intent.payment_failed':
+      intent = event.data.object;
+      const message = intent.last_payment_error && intent.last_payment_error.message;
+      console.log('Failed:', intent.id, message);
+      break;
+  }
+
+  response.sendStatus(200);
 });
 
 // This route is called to show the orders to the dashboard
