@@ -58,9 +58,10 @@ var corsOptions = {
 let corsOptions2 = {
   origin: "https://ckpantelides.github.io",
   methods: 'DELETE, POST, GET, OPTIONS',
-  allowedHeaders: 'Content-Type,Authorization,Access-Control-Allow-Headers, X-Requested-With',
+  allowedHeaders: 'Content-Type,Authorization,Access-Control-Allow-Headers,X-Requested-With',
   credentials: true,
-  preflightContinue: true
+  preflightContinue: true,
+  optionsSuccessStatus: 200
 }
 
 app.use(express.static('.'));
