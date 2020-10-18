@@ -186,42 +186,42 @@ app.post('/update', cors(corsOptions2), function (request, response) {
     if (err) {
       return console.error(err.message);
      } else {
-      updateEnquiries(data);
+      updateEnquiries(request.body);
       response.sendStatus(200);
       }
   });
    // iterate over the updated enquiry data and insert into requests table
   function updateEnquiries(array) {
-    if (array != null && array != 'undefined') {
-     array.forEach(el => { 
+    array.forEach(el => { 
       pool
-        .query(
-          'INSERT INTO orders(orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)' [
-            el.orderid,
-            el.date,
-            el.delname,
-            el.email,
-            el.address,
-            el.postcode,
-            el.type,
-            el.story,
-            el.charname,
-            el.avatar, 
-            el.brand, 
-            el.last4, 
-            el.paymentintentid, 
-            el.paid, 
-            el.read
-           ]
-         )
-         .catch(err =>
-           setImmediate(() => {
-             throw err;
-           })
-         );
-     });
+      .query(
+        'INSERT INTO orders(orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)',
+        [
+          el.orderid,
+          el.data,
+          el.delname,
+          el.email,
+          el.address,
+          el.postcode,
+          el.type,
+          el.story,
+          el.charname,
+          el.avatar,
+          el.brand,
+          el.last4,
+          el.paymentid,
+          el.paid,
+          el.read,
+        ]
+      )
+      .then(console.log('Order database updated'))
+      .catch((err) =>
+        setImmediate(() => {
+          throw err;
+        })
+      );
+    });
    }
-  }
 });
 
 // Test route for admin login
