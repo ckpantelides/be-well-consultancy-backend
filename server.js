@@ -174,6 +174,22 @@ app.post('/webhook', [cors(), bodyParser.raw({type: 'application/json'})], (requ
     console.log(`⚠️  Webhook error while parsing basic request.`, err.message);
     return response.send();
   }
+  // Only verify the event if you have an endpoint secret defined.
+  // Otherwise use the basic event deserialized with JSON.parse
+  if (endpointSecret) {
+    // Get the signature sent by Stripe
+    const signature = request.headers['stripe-signature'];
+    try {
+      event = stripe.webhooks.constructEvent(
+        request.body,
+        signature,
+        endpointSecret
+      );
+    } catch (err) {
+      console.log(`⚠️  Webhook signature verification failed.`, err.message);
+      return response.send(200);
+    }
+  }
   // Handle the event
   switch (event.type) {
     case 'payment_intent.succeeded':
