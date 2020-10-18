@@ -143,7 +143,7 @@ app.post('/create-payment-intent', cors(), async (req, res) => {
         customerDetails.address,
         customerDetails.postcode,
         customerDetails.type,
-        customerDetails.story.match(/(.*?\s){3}/g),
+        customerDetails.story.match(/(.*?\s){3}/g)[0],
         customerDetails.charName,
         customerDetails.avatar,
         cardDetails.brand,
