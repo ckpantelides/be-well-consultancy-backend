@@ -191,11 +191,11 @@ app.post('/update', cors(corsOptions2), function (request, response) {
       }
   });
    // iterate over the updated enquiry data and insert into requests table
-   function updateEnquiries(array) {
-     if (array != null && array != 'undefined') {
+  function updateEnquiries(array) {
+    if (array != null && array != 'undefined') {
      array.forEach(el => { 
-       pool
-         .query(
+      pool
+        .query(
           'INSERT INTO orders(orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)' [
             el.orderid,
             el.date,
