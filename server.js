@@ -41,7 +41,7 @@ const pool = new Pool({
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support urlencoded bodies
 app.use(cookieParser());
-app.use(require('body-parser').text({type: '*/*'})); // required for Stripe webook root
+app.use(require('body-parser').text({type: '*/*'})); // required for Stripe webhook root
 
 // Stripe webhook secret
 const endpointSecret = process.env.webhookSecret;
@@ -99,6 +99,7 @@ app.options('/orders', cors(corsOptions));
 
 // Pre-flight requests for payment and TEMPORARILY register & update allowed from all origins
 app.options('/create-payment-intent', cors());
+app.options('/webhook', cors());
 app.options('/register', cors());
 
 app.get('/', cors(), (req, res) => res.send('Hello World!'));
@@ -166,7 +167,7 @@ app.post('/create-payment-intent', cors(), async (req, res) => {
 });
 
 // Webhook route confirms with Stripe that a payment intent succeeded
-app.post('/webhook', function(request, response) {
+app.post('/webhook', cors(), function(request, response) {
   const sig = request.headers['stripe-signature'];
   const body = request.body;
 
