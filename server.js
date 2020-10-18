@@ -55,6 +55,11 @@ var corsOptions = {
   method: 'GET,POST'
 }
 
+let corsOptions2 = {
+  origin: "https://ckpantelides.github.io",
+  credentials: true,
+}
+
 app.use(express.static('.'));
 app.use(express.json());
 
@@ -68,7 +73,7 @@ const calculateOrderAmount = (type) => {
 };
 
 // Pre-flight requests for api routes from whitelist only
-app.options('/update', cors(corsOptions)); 
+app.options('/update', cors(corsOptions2)); 
 app.options('/api/authenticate', cors(corsOptions));
 app.options('/api/secret', cors(corsOptions)); 
 app.options('/api/checkToken', cors(corsOptions));
@@ -156,9 +161,11 @@ app.get('/orders', [cors(corsOptions), withAuth], function (request, response) {
   );
 });
 
-app.post('/update'), cors(corsOptions), function (request, response) {
+app.post('/update'), cors(corsOptions2), function (request, response) {
    // set data to the updated enquiries received from the frontend
-   console.log(request.body);
+  console.log(request.body);
+  response.send('Christos wins');
+   /*
    const data = request.body.data;
 
    // iterate over the updated enquiry data and insert into requests table
@@ -210,6 +217,7 @@ app.post('/update'), cors(corsOptions), function (request, response) {
        updateEnquiries();
      }
    });
+   */
 }
 
 // Test route for admin login
