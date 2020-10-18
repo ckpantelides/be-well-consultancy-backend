@@ -60,7 +60,6 @@ let corsOptions2 = {
   methods: 'DELETE, POST, GET, OPTIONS',
   allowedHeaders: 'Content-Type,Authorization,X-Requested-With',
   credentials: true,
-  preflightContinue: true,
   optionsSuccessStatus: 200
 }
 
@@ -170,7 +169,7 @@ app.get('/orders', [cors(corsOptions), withAuth], function (request, response) {
 app.post('/update'), cors(corsOptions2), function (request, response) {
    // set data to the updated enquiries received from the frontend
   console.log(request.body);
-  response.send('Christos wins');
+  response.sendStatus(200);
    /*
    const data = request.body.data;
 
