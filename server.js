@@ -42,7 +42,7 @@ app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support urlencoded bodies
 app.use(cookieParser());
 
-let whitelist = ['https://ckpantelides.github.io', 'http://localhost:3000']
+let whitelist = ['https://ckpantelides.github.io']
 var corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1) {
@@ -56,13 +56,19 @@ var corsOptions = {
 }
 
 let corsOptions2 = {
-  origin: "https://ckpantelides.github.io",
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
   methods: 'DELETE, POST, GET, OPTIONS, PUT',
   allowedHeaders: 'Content-Type,Authorization,X-Requested-With',
   credentials: true,
   optionsSuccessStatus: 200,
   exposedHeaders:  'Content-Range,X-Content-Range',
-  "preflightContinue": true,
+  preflightContinue: true,
 }
 
 app.use(express.static('.'));
