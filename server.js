@@ -68,6 +68,7 @@ const calculateOrderAmount = (type) => {
 };
 
 // Pre-flight requests for api routes from whitelist only
+app.options('/update', cors(corsOptions)); 
 app.options('/api/authenticate', cors(corsOptions));
 app.options('/api/secret', cors(corsOptions)); 
 app.options('/api/checkToken', cors(corsOptions));
@@ -77,7 +78,6 @@ app.options('/orders', cors(corsOptions));
 // Pre-flight requests for payment and TEMPORARILY register & update allowed from all origins
 app.options('/create-payment-intent', cors());
 app.options('/register', cors());
-app.options('/update', cors()); 
 
 app.get('/', cors(), (req, res) => res.send('Hello World!'));
 
@@ -156,7 +156,7 @@ app.get('/orders', [cors(corsOptions), withAuth], function (request, response) {
   );
 });
 
-app.post('/update'), cors(), function (request, response) {
+app.post('/update'), cors(corsOptions), function (request, response) {
    // set data to the updated enquiries received from the frontend
    console.log(request.body);
    const data = request.body.data;
