@@ -131,6 +131,7 @@ app.post('/create-payment-intent', cors(), async (req, res) => {
 
   // insert the order into the order table. "Paid" will be set as false, and updated once
   // confirmation is received from Stripe via webhook
+  // The story is split after the third space in its title
   pool
     .query(
       'INSERT INTO orders(orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)',
@@ -142,7 +143,7 @@ app.post('/create-payment-intent', cors(), async (req, res) => {
         customerDetails.address,
         customerDetails.postcode,
         customerDetails.type,
-        customerDetails.story,
+        customerDetails.story.match(/(.*?\s){3}/g),
         customerDetails.charName,
         customerDetails.avatar,
         cardDetails.brand,
