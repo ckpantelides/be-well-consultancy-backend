@@ -231,7 +231,7 @@ app.post('/update', cors(corsOptions2), function (request, response) {
      }
    });
    */
-}
+});
 
 // Test route for admin login
 app.get('/api/home', cors(corsOptions), function (req, res) {
