@@ -176,31 +176,31 @@ app.get('/orders', [cors(corsOptions), withAuth], function (request, response) {
 
 app.post('/update', cors(corsOptions2), function (request, response) {
    // set data to the updated enquiries received from the frontend
-   const data = request.body;
-
+  const data = request.body;
+  console.log(data);
    // iterate over the updated enquiry data and insert into requests table
-   function updateEnquiries() {
-     data.forEach(function(el, index) { 
+   function updateEnquiries(array) {
+     array.forEach(el => { 
        // insert updated enquiry data into requests table
        pool
          .query(
-          'INSERT INTO orders(rowid, orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)'           [
-             el.rowid,
-             el.orderid,
-             el.date,
-             el.delname,
-             el.email,
-             el.address,
-             el.postcode,
-             el.type,
-             el.story,
-             el.charname,
-             el.avatar, 
-             el.brand, 
-             el.last4, 
-             el.paymentintentid, 
-             el.paid, 
-             el.read
+          'INSERT INTO orders(rowid, orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)' [
+            el.rowid,
+            el.orderid,
+            el.date,
+            el.delname,
+            el.email,
+            el.address,
+            el.postcode,
+            el.type,
+            el.story,
+            el.charname,
+            el.avatar, 
+            el.brand, 
+            el.last4, 
+            el.paymentintentid, 
+            el.paid, 
+            el.read
            ]
          )
          .catch(err =>
@@ -217,9 +217,10 @@ app.post('/update', cors(corsOptions2), function (request, response) {
      if (err) {
        return console.error(err.message);
      } else {
-       updateEnquiries();
+       updateEnquiries(data);
      }
    });
+   res.sendStatus(200);
 });
 
 // Test route for admin login
