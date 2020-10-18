@@ -174,7 +174,7 @@ app.get('/orders', [cors(corsOptions), withAuth], function (request, response) {
   );
 });
 
-app.post('/update'), cors(corsOptions2), function (request, response) {
+app.post('/update', cors(corsOptions2), function (request, response) {
    // set data to the updated enquiries received from the frontend
   console.log(request.body);
   response.sendStatus(200);
