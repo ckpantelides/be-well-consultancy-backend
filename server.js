@@ -41,7 +41,6 @@ const pool = new Pool({
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support urlencoded bodies
 app.use(cookieParser());
-app.use(require('body-parser').text({type: '*/*'})); // required for Stripe webhook root
 
 // Stripe webhook secret
 const endpointSecret = process.env.webhookSecret;
@@ -167,34 +166,33 @@ app.post('/create-payment-intent', cors(), async (req, res) => {
 });
 
 // Webhook route confirms with Stripe that a payment intent succeeded
-app.post('/webhook', cors(), function(request, response) {
-  const sig = request.headers['stripe-signature'];
-  const body = request.body;
-
-  let event = null;
-
+app.post('/webhook', [cors(), bodyParser.raw({type: 'application/json'})], (request, response) => {
+  let event;
   try {
-    event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+    event = JSON.parse(request.body);
   } catch (err) {
-    // invalid signature
-    response.status(400).end();
-    return;
+    console.log(`⚠️  Webhook error while parsing basic request.`, err.message);
+    return response.send();
   }
-
-  let intent = null;
-  switch (event['type']) {
+  // Handle the event
+  switch (event.type) {
     case 'payment_intent.succeeded':
-      intent = event.data.object;
-      console.log("Succeeded:", intent.id);
+      const paymentIntent = event.data.object;
+      console.log(`PaymentIntent for ${paymentIntent.amount} was successful!`);
+      // Then define and call a method to handle the successful payment intent.
+      // handlePaymentIntentSucceeded(paymentIntent);
       break;
-    case 'payment_intent.payment_failed':
-      intent = event.data.object;
-      const message = intent.last_payment_error && intent.last_payment_error.message;
-      console.log('Failed:', intent.id, message);
+    case 'payment_method.attached':
+      const paymentMethod = event.data.object;
+      // Then define and call a method to handle the successful attachment of a PaymentMethod.
+      // handlePaymentMethodAttached(paymentMethod);
       break;
+    default:
+      // Unexpected event type
+      console.log(`Unhandled event type ${event.type}.`);
   }
-
-  response.sendStatus(200);
+  // Return a 200 response to acknowledge receipt of the event
+  response.send();
 });
 
 // This route is called to show the orders to the dashboard
