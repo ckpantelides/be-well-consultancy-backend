@@ -180,15 +180,12 @@ app.post('/update', cors(corsOptions2), function (request, response) {
 
    // iterate over the updated enquiry data and insert into requests table
    function updateEnquiries() {
-     data.forEach(function(el, index) {
-       // rowid is reset to account for orders being deleted on the front-end
-       let newRowid = index + 1;
- 
+     data.forEach(function(el, index) { 
        // insert updated enquiry data into requests table
        pool
          .query(
           'INSERT INTO orders(rowid, orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)'           [
-             newRowid,
+             el.rowid,
              el.orderid,
              el.date,
              el.delname,
@@ -214,16 +211,12 @@ app.post('/update', cors(corsOptions2), function (request, response) {
      });
    }
  
-   // this will be used in the query below to set the primary key to data.length + 1
-   let resetPrimaryKey = `SELECT setval('requests_rowid_seq', ${data.length}, true);`;
- 
    // deletes all rows from the requests table and then calls updateEnquiries()
    // this is necessary to reset the rowids, to account for reodered enquiries
    pool.query('TRUNCATE TABLE orders', function(err) {
      if (err) {
        return console.error(err.message);
      } else {
-       pool.query(resetPrimaryKey);
        updateEnquiries();
      }
    });
