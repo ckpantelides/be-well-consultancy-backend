@@ -197,6 +197,16 @@ app.post('/webhook', [cors(), bodyParser.raw({type: 'application/json'})], (requ
       console.log(`PaymentIntent for ${paymentIntent.amount} was successful!`);
       // Then define and call a method to handle the successful payment intent.
       // handlePaymentIntentSucceeded(paymentIntent);
+      pool
+      .query('INSERT INTO orders(paid) VALUES("true") WHERE paymentintentid = $1', [
+        paymentIntent.id
+      ])
+      .then(res.status(200).send('Order marked as paid'))
+      .catch((err) =>
+        setImmediate(() => {
+          throw err;
+        })
+      );
       break;
     case 'payment_method.attached':
       const paymentMethod = event.data.object;
