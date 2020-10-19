@@ -38,7 +38,7 @@ const pool = new Pool({
   },
 });
 
-app.use(bodyParser.json()); // support json encoded bodies
+//app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support urlencoded bodies
 app.use(cookieParser());
 
@@ -75,7 +75,7 @@ let corsOptions2 = {
 }
 
 app.use(express.static('.'));
-app.use(express.json());
+//app.use(express.json());
 
 const calculateOrderAmount = (type) => {
   // Replace this constant with a calculation of the order's amount
@@ -87,7 +87,7 @@ const calculateOrderAmount = (type) => {
 };
 
 // Pre-flight requests for api routes from whitelist only
-app.options('/update', cors(corsOptions2), function (req, res) {
+app.options('/update', [cors(corsOptions2), bodyParser.json()], function (req, res) {
   res.sendStatus(200)}); 
 
 app.options('/api/authenticate', cors(corsOptions));
@@ -169,8 +169,8 @@ app.post('/create-payment-intent', cors(), async (req, res) => {
 app.post('/webhook', [cors(), bodyParser.raw({type: 'application/json'})], (request, response) => {
   let event;
   try {
-    //event = JSON.parse(request.body);
-    event = request.body;
+    event = JSON.parse(request.body);
+    //event = request.body;
   } catch (err) {
     console.log(`⚠️  Webhook error while parsing basic request.`, err.message);
     return response.send();
@@ -221,7 +221,7 @@ app.post('/webhook', [cors(), bodyParser.raw({type: 'application/json'})], (requ
 });
 
 // This route is called to show the orders to the dashboard
-app.get('/orders', [cors(corsOptions), withAuth], function (request, response) {
+app.get('/orders', [cors(corsOptions), withAuth, bodyParser.json()], function (request, response) {
   pool.query(
     'SELECT rowid, orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read FROM orders ORDER BY rowid',
     (err, res) => {
@@ -234,7 +234,7 @@ app.get('/orders', [cors(corsOptions), withAuth], function (request, response) {
   );
 });
 
-app.post('/update', cors(corsOptions2), function (request, response) {
+app.post('/update', [cors(corsOptions2),bodyParser.json()], function (request, response) {
    // set data to the updated enquiries received from the frontend
   const data = request.body;
   console.log(data);
@@ -285,22 +285,22 @@ app.post('/update', cors(corsOptions2), function (request, response) {
 });
 
 // Test route for admin login
-app.get('/api/home', cors(corsOptions), function (req, res) {
+app.get('/api/home', [cors(corsOptions), bodyParser.json()], function (req, res) {
   res.send("The server's up and running");
 });
 
 // Test route for admin login
-app.get('/api/secret', [cors(corsOptions), withAuth], function (req, res) {
+app.get('/api/secret', [cors(corsOptions), withAuth, bodyParser.json()], function (req, res) {
   res.send('Christos is the best');
 });
 
 // Route for the front-end to check it has a valid token
-app.get('/api/checkToken', [cors(corsOptions), withAuth], function(req, res) {
+app.get('/api/checkToken', [cors(corsOptions), withAuth, bodyParser.json()], function(req, res) {
   res.sendStatus(200);
 });
 
 // POST route to register a user
-app.post('/register', function (req, res) {
+app.post('/register', bodyParser.json(), function (req, res) {
   const { email, password } = req.body;
 
   // Auto generates salt and hash
@@ -324,7 +324,7 @@ app.post('/register', function (req, res) {
   });
 });
 
-app.post('/api/authenticate', cors(corsOptions), function (req, res) {
+app.post('/api/authenticate', [cors(corsOptions), bodyParser.json()], function (req, res) {
   const { email, password } = req.body;
   let hash = '';
 
