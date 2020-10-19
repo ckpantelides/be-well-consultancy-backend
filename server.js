@@ -169,7 +169,8 @@ app.post('/create-payment-intent', cors(), async (req, res) => {
 app.post('/webhook', [cors(), bodyParser.raw({type: 'application/json'})], (request, response) => {
   let event;
   try {
-    event = JSON.parse(request.body);
+    //event = JSON.parse(request.body);
+    event = request.body;
   } catch (err) {
     console.log(`⚠️  Webhook error while parsing basic request.`, err.message);
     return response.send();
