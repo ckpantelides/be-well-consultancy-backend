@@ -198,7 +198,7 @@ app.post('/webhook', [cors(), bodyParser.raw({type: 'application/json'})], (requ
       // Then define and call a method to handle the successful payment intent.
       // handlePaymentIntentSucceeded(paymentIntent);
       pool
-      .query('INSERT INTO orders(paid) VALUES("true") WHERE paymentintentid = $1', [
+      .query("INSERT INTO orders(paid) VALUES('true') WHERE paymentintentid = $1", [
         paymentIntent.id
       ])
       .then(res.status(200).send('Order marked as paid'))
