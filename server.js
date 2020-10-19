@@ -198,9 +198,7 @@ app.post('/webhook', [cors(), bodyParser.raw({type: 'application/json'})], (requ
       // Then define and call a method to handle the successful payment intent.
       // handlePaymentIntentSucceeded(paymentIntent);
       pool
-      .query('UPDATE orders SET paid = true WHERE paymentintentid = $1', [
-        paymentIntent.id
-      ])
+      .query('UPDATE orders SET paid=($1) WHERE paymentintentid=($2)',['true', paymentIntent.id])
       .then(res.status(200).send('Order marked as paid'))
       .catch((err) =>
         setImmediate(() => {
