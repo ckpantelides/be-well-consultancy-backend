@@ -209,7 +209,7 @@ app.post('/webhook', [cors(), bodyParser.raw({type: 'application/json'})], (requ
 
 // This route is called to show the orders to the dashboard
 app.get('/orders', [cors(corsOptions), withAuth, bodyParser.json()], function (request, response) {
-    showOrders(err, function(error, data){
+    showOrders(function(error, data){
     if (error) return response.send(error);
     response.status(200).send(data);
   }); 
