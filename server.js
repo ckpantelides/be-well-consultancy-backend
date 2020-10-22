@@ -21,6 +21,9 @@ const JWTsecret = process.env.JWTsecret;
 const cookieParser = require('cookie-parser');
 const withAuth = require('./middleware'); // Checks token from user is valid
 
+// helper functions
+const { showOrders } = require('./helpers/database.js');
+
 // pg is the module used for node to interact with postgresql
 let pg = require('pg');
 if (process.env.DATABASE_URL) {
@@ -78,9 +81,6 @@ app.use(express.static('.'));
 //app.use(express.json());
 
 const calculateOrderAmount = (type) => {
-  // Replace this constant with a calculation of the order's amount
-  // Calculate the order total on the server to prevent
-  // people from directly manipulating the amount on the client
   let price = '';
   type === 'paperback' ? (amount = 1698) : (amount = 2498);
   return amount;
@@ -108,23 +108,13 @@ app.get('/create-payment-intent', cors(), (req, res) =>
 );
 
 app.post('/create-payment-intent', cors(), async (req, res) => {
-  // console.log('Intent received');
-  // res.send('Create payment intent');
-  /*
-  const { items } = req.body;
-  console.log(req.body);
-  console.log(items);
-*/
+
   let data = Object.keys(req.body);
   let customerDetails = JSON.parse(data[0]);
   let cardDetails = JSON.parse(data[1]);
 
-  // Add all details when payment intent created
-  // Have field 'paid' and paymentintentid to track payment
-  // Need webhook to track if successful. Then inform user with orderid
-  // Collect billing address!
+  // TODO inform user of orderid. Collect billing address
 
-  // Create a PaymentIntent with the order amount and currency
   const paymentIntent = await stripe.paymentIntents.create({
     amount: calculateOrderAmount(customerDetails.type),
     currency: 'gbp',
@@ -195,9 +185,7 @@ app.post('/webhook', [cors(), bodyParser.raw({type: 'application/json'})], (requ
   switch (event.type) {
     case 'payment_intent.succeeded':
       const paymentIntent = event.data.object;
-      console.log(`PaymentIntent for ${paymentIntent.amount} was successful!`);
-      // Then define and call a method to handle the successful payment intent.
-      // handlePaymentIntentSucceeded(paymentIntent);
+  
       pool
       .query('UPDATE orders SET paid=($1) WHERE paymentintentid=($2)',['true', paymentIntent.id])
       .then(response.status(200).send('Order marked as paid'))
@@ -210,7 +198,6 @@ app.post('/webhook', [cors(), bodyParser.raw({type: 'application/json'})], (requ
     case 'payment_method.attached':
       const paymentMethod = event.data.object;
       // Then define and call a method to handle the successful attachment of a PaymentMethod.
-      // handlePaymentMethodAttached(paymentMethod);
       break;
     default:
       // Unexpected event type
@@ -222,16 +209,10 @@ app.post('/webhook', [cors(), bodyParser.raw({type: 'application/json'})], (requ
 
 // This route is called to show the orders to the dashboard
 app.get('/orders', [cors(corsOptions), withAuth, bodyParser.json()], function (request, response) {
-  pool.query(
-    'SELECT rowid, orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read FROM orders ORDER BY rowid',
-    (err, res) => {
-      if (err) {
-        return console.log(err.message);
-      } else {
-        response.send(res.rows);
-      }
-    }
-  );
+    showOrders(err, function(error, data){
+    if (error) return res.send(error);
+    res.status(200).send(data);
+  }); 
 });
 
 app.post('/update', [cors(corsOptions2),bodyParser.json()], function (request, response) {
@@ -353,7 +334,6 @@ app.post('/api/authenticate', [cors(corsOptions), bodyParser.json()], function (
         console.log('Incorrect email address');
         res.status(401).json({ error: 'Incorrect email or password'});
       } else {
-       // console.log(result.rows[0]);
         hash = result.rows[0].password;
         comparePassword(password, hash);
       }
