@@ -27,9 +27,12 @@ showOrders: (callback) => {
         }
     );  
   },
-  updateEnquiries: (array) => {
+  updateEnquiries: (error, array, callback) => {
+    if (error) return callback(err);
+    pool
+      .query('TRUNCATE TABLE orders');
     array.forEach(el => { 
-      pool
+    pool
       .query(
         'INSERT INTO orders(orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)',
         [
@@ -51,8 +54,6 @@ showOrders: (callback) => {
         ]
       )
     });
-   },
-   truncateTable: () => {
-    pool.query('TRUNCATE TABLE orders');
+    return callback(null,true);
    }
 }

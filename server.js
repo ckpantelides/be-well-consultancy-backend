@@ -220,11 +220,10 @@ app.post('/update', [cors(corsOptions2),bodyParser.json()], function (request, r
   
    // deletes all rows from the requests table and then calls updateEnquiries()
    // this is necessary to reset the rowids, to account for deleted enquiries
-  truncateTable()
-  .then(updateEnquiries(data))
-  .then(response.sendStatus(200)
-  .catch(err => response.send(err) ));
-
+  updateEnquiries(err, data, function(error,result) {
+    if (error) return response.send(error);
+    if (result) return response.send(200);
+  });
 });
 
 // Test route for admin login
