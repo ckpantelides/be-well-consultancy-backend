@@ -10,9 +10,6 @@ const bodyParser = require('body-parser');
 // Stripe handles payments for physical books via create-payment-intent
 const stripe = require('stripe')(process.env.stripeTestKey);
 
-// Used to generate order IDs
-const shortid = require('shortid');
-
 // Web tokens will be used to authenticate admin
 const jwt = require('jsonwebtoken');
 const JWTsecret = process.env.JWTsecret;

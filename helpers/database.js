@@ -1,10 +1,9 @@
+// pool is used instead of client to connect to postgresql (client kept returning errors)
+// c.f. npm 'pg' documentation recommends pools. No need to call pool.end() - the pool can be left open
 let pg = require('pg');
 if (process.env.DATABASE_URL) {
   pg.defaults.ssl = true;
 }
-
-// pool is used instead of client to connect to postgresql (client kept returning errors)
-// c.f. npm 'pg' documentation recommends pools. No need to call pool.end() - the pool can be left open
 let connString = process.env.DATABASE_URL;
 const { Pool } = require('pg');
 const pool = new Pool({
@@ -13,6 +12,9 @@ const pool = new Pool({
     rejectUnauthorized: false,
   },
 });
+
+// Used to generate order IDs
+const shortid = require('shortid');
 
 module.exports = {
 showOrders: (callback) => {
