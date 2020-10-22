@@ -220,7 +220,7 @@ app.post('/update', [cors(corsOptions2),bodyParser.json()], function (request, r
   
    // deletes all rows from the requests table and then calls updateEnquiries()
    // this is necessary to reset the rowids, to account for deleted enquiries
-  updateEnquiries(err, data, function(error,result) {
+  updateEnquiries(null, data, function(error,result) {
     if (error) return response.send(error);
     if (result) return response.send(200);
   });

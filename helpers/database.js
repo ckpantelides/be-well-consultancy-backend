@@ -28,7 +28,7 @@ showOrders: (callback) => {
     );  
   },
   updateEnquiries: (error, array, callback) => {
-    if (error) return callback(err);
+    if (error) return callback(error);
     pool
       .query('TRUNCATE TABLE orders');
     array.forEach(el => { 
