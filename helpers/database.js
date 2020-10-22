@@ -15,7 +15,7 @@ const pool = new Pool({
 });
 
 module.exports = {
-showOrders: (error, callback) => {
+showOrders: (callback) => {
     if (error) return callback(error);
     pool.query(
         'SELECT rowid, orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read FROM orders ORDER BY rowid',
