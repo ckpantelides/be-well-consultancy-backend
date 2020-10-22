@@ -119,7 +119,7 @@ app.post('/create-payment-intent', cors(), async (req, res) => {
   // The story is split after the third space in its title
 
   //TODO catch error here?
-  insertNewOrder(customerDetails, cardDetails);
+  insertNewOrder(customerDetails, cardDetails, paymentIntent.id);
 });
 
 // Webhook route confirms with Stripe that a payment intent succeeded

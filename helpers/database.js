@@ -58,7 +58,7 @@ showOrders: (callback) => {
     });
     return callback(null,true);
    },
-   insertNewOrder: (customerDetails,cardDetails) => {
+   insertNewOrder: (customerDetails,cardDetails,paymentIntentID) => {
     pool
    .query(
      'INSERT INTO orders(orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)',
@@ -75,7 +75,7 @@ showOrders: (callback) => {
        customerDetails.avatar,
        cardDetails.brand,
        cardDetails.last4,
-       paymentIntent.id,
+       paymentIntentID,
        'false',
        'false',
      ]
