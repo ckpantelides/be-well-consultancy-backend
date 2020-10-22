@@ -22,7 +22,8 @@ const cookieParser = require('cookie-parser');
 const withAuth = require('./middleware'); // Checks token from user is valid
 
 // helper functions
-const { showOrders, updateEnquiries, truncateTable } = require('./helpers/database.js');
+const { showOrders, updateEnquiries, insertNewOrder } = require('./helpers/database.js');
+const { calculateOrderAmount } = require('./helpers/util.js');
 
 // pg is the module used for node to interact with postgresql
 let pg = require('pg');
@@ -80,12 +81,6 @@ let corsOptions = {
 app.use(express.static('.'));
 //app.use(express.json());
 
-const calculateOrderAmount = (type) => {
-  let price = '';
-  type === 'paperback' ? (amount = 1698) : (amount = 2498);
-  return amount;
-};
-
 // Pre-flight requests for api routes from whitelist only
 app.options('/update', [cors(corsOptions), bodyParser.json()], function (req, res) {
   res.sendStatus(200)}); 
@@ -125,33 +120,9 @@ app.post('/create-payment-intent', cors(), async (req, res) => {
   // insert the order into the order table. "Paid" will be set as false, and updated once
   // confirmation is received from Stripe via webhook
   // The story is split after the third space in its title
-  pool
-    .query(
-      'INSERT INTO orders(orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)',
-      [
-        shortid.generate(),
-        new Date().toISOString().slice(0, 10),
-        customerDetails.delName,
-        cardDetails.email,
-        customerDetails.address,
-        customerDetails.postcode,
-        customerDetails.type,
-        customerDetails.story.match(/(.*?\s){3}/g)[0],
-        customerDetails.charName,
-        customerDetails.avatar,
-        cardDetails.brand,
-        cardDetails.last4,
-        paymentIntent.id,
-        'false',
-        'false',
-      ]
-    )
-    .then(console.log('Order inserted into database'))
-    .catch((err) =>
-      setImmediate(() => {
-        throw err;
-      })
-    );
+
+  //TODO catch error here?
+  insertNewOrder(customerDetails, cardDetails);
 });
 
 // Webhook route confirms with Stripe that a payment intent succeeded

@@ -55,5 +55,34 @@ showOrders: (callback) => {
       )
     });
     return callback(null,true);
-   }
+   },
+   insertNewOrder: (customerDetails,cardDetails) => {
+    pool
+   .query(
+     'INSERT INTO orders(orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)',
+     [
+       shortid.generate(),
+       new Date().toISOString().slice(0, 10),
+       customerDetails.delName,
+       cardDetails.email,
+       customerDetails.address,
+       customerDetails.postcode,
+       customerDetails.type,
+       customerDetails.story.match(/(.*?\s){3}/g)[0],
+       customerDetails.charName,
+       customerDetails.avatar,
+       cardDetails.brand,
+       cardDetails.last4,
+       paymentIntent.id,
+       'false',
+       'false',
+     ]
+   )
+   .then(console.log('Order inserted into database'))
+   .catch((err) =>
+     setImmediate(() => {
+       throw err;
+     })
+   );
+    }
 }
