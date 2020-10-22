@@ -22,7 +22,7 @@ const cookieParser = require('cookie-parser');
 const withAuth = require('./middleware'); // Checks token from user is valid
 
 // helper functions
-const { showOrders } = require('./helpers/database.js');
+const { showOrders, updateEnquiries } = require('./helpers/database.js');
 
 // pg is the module used for node to interact with postgresql
 let pg = require('pg');
@@ -49,7 +49,7 @@ app.use(cookieParser());
 const endpointSecret = process.env.webhookSecret;
 
 let whitelist = ['https://ckpantelides.github.io']
-var corsOptions = {
+var corsOptions2 = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1) {
       callback(null, true)
@@ -61,7 +61,7 @@ var corsOptions = {
   method: 'GET,POST'
 }
 
-let corsOptions2 = {
+let corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1) {
       callback(null, true)
@@ -87,9 +87,8 @@ const calculateOrderAmount = (type) => {
 };
 
 // Pre-flight requests for api routes from whitelist only
-app.options('/update', [cors(corsOptions2), bodyParser.json()], function (req, res) {
+app.options('/update', [cors(corsOptions), bodyParser.json()], function (req, res) {
   res.sendStatus(200)}); 
-
 app.options('/api/authenticate', cors(corsOptions));
 app.options('/api/secret', cors(corsOptions)); 
 app.options('/api/checkToken', cors(corsOptions));
@@ -218,8 +217,6 @@ app.get('/orders', [cors(corsOptions), withAuth, bodyParser.json()], function (r
 app.post('/update', [cors(corsOptions2),bodyParser.json()], function (request, response) {
    // set data to the updated enquiries received from the frontend
   const data = request.body;
-  console.log(data);
-
   
    // deletes all rows from the requests table and then calls updateEnquiries()
    // this is necessary to reset the rowids, to account for reodered enquiries
@@ -227,42 +224,10 @@ app.post('/update', [cors(corsOptions2),bodyParser.json()], function (request, r
     if (err) {
       return console.error(err.message);
      } else {
-      updateEnquiries(request.body);
+      updateEnquiries(data);
       response.sendStatus(200);
       }
   });
-   // iterate over the updated enquiry data and insert into requests table
-  function updateEnquiries(array) {
-    array.forEach(el => { 
-      pool
-      .query(
-        'INSERT INTO orders(orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)',
-        [
-          el.orderid,
-          el.data,
-          el.delname,
-          el.email,
-          el.address,
-          el.postcode,
-          el.type,
-          el.story,
-          el.charname,
-          el.avatar,
-          el.brand,
-          el.last4,
-          el.paymentintentid,
-          el.paid,
-          el.read,
-        ]
-      )
-      .then(console.log('Order database updated'))
-      .catch((err) =>
-        setImmediate(() => {
-          throw err;
-        })
-      );
-    });
-   }
 });
 
 // Test route for admin login

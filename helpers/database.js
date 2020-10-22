@@ -26,5 +26,36 @@ showOrders: (callback) => {
           }
         }
     );  
-  }
+  },
+  updateEnquiries: (array) => {
+    array.forEach(el => { 
+      pool
+      .query(
+        'INSERT INTO orders(orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)',
+        [
+          el.orderid,
+          el.data,
+          el.delname,
+          el.email,
+          el.address,
+          el.postcode,
+          el.type,
+          el.story,
+          el.charname,
+          el.avatar,
+          el.brand,
+          el.last4,
+          el.paymentintentid,
+          el.paid,
+          el.read,
+        ]
+      )
+      .then(console.log('Order database updated'))
+      .catch((err) =>
+        setImmediate(() => {
+          throw err;
+        })
+      );
+    });
+   }
 }
