@@ -22,7 +22,7 @@ const cookieParser = require('cookie-parser');
 const withAuth = require('./middleware'); // Checks token from user is valid
 
 // helper functions
-const { showOrders, updateEnquiries } = require('./helpers/database.js');
+const { showOrders, updateEnquiries, truncateTable } = require('./helpers/database.js');
 
 // pg is the module used for node to interact with postgresql
 let pg = require('pg');
@@ -219,15 +219,12 @@ app.post('/update', [cors(corsOptions2),bodyParser.json()], function (request, r
   const data = request.body;
   
    // deletes all rows from the requests table and then calls updateEnquiries()
-   // this is necessary to reset the rowids, to account for reodered enquiries
-  pool.query('TRUNCATE TABLE orders', function(err) {
-    if (err) {
-      return console.error(err.message);
-     } else {
-      updateEnquiries(data);
-      response.sendStatus(200);
-      }
-  });
+   // this is necessary to reset the rowids, to account for deleted enquiries
+  truncateTable()
+  .then(updateEnquiries(data))
+  .then(response.sendStatus(200)
+  .catch(err => response.send(err) ));
+
 });
 
 // Test route for admin login

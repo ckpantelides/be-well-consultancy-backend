@@ -50,12 +50,9 @@ showOrders: (callback) => {
           el.read,
         ]
       )
-      .then(console.log('Order database updated'))
-      .catch((err) =>
-        setImmediate(() => {
-          throw err;
-        })
-      );
     });
+   },
+   truncateTable: () => {
+    pool.query('TRUNCATE TABLE orders');
    }
 }
