@@ -107,4 +107,29 @@ module.exports = {
         })
       );
   },
+  registerUser: (email, hash) => {
+    pool
+      .query('INSERT INTO users(email, password)VALUES($1, $2)', [email, hash])
+      .then(console.log('Welcome to the club!'))
+      .catch((err) =>
+        setImmediate(() => {
+          throw err;
+        })
+      );
+  },
+  getPassword: (err, email, callback) => {
+    pool
+      .query('SELECT password FROM users WHERE email = $1', [email])
+      .then((result) => {
+        if (result.rows.length === 0) {
+          callback(err);
+        } else {
+          hash = result.rows[0].password;
+          callback(null, hash);
+        }
+      })
+      .catch((e) => {
+        callback(e.stack);
+      });
+  },
 };

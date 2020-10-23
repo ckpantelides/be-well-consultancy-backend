@@ -25,23 +25,10 @@ const {
   updateEnquiries,
   insertNewOrder,
   confirmPaid,
+  registerUser,
+  getPassword,
 } = require('./helpers/database.js');
 const { calculateOrderAmount } = require('./helpers/util.js');
-
-// pg is the module used for node to interact with postgresql
-let pg = require('pg');
-if (process.env.DATABASE_URL) {
-  pg.defaults.ssl = true;
-}
-// pool is used to connect to postgresql. No need to call pool.end() - the pool can be left open
-let connString = process.env.DATABASE_URL;
-const { Pool } = require('pg');
-const pool = new Pool({
-  connectionString: connString,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
 
 app.use(bodyParser.urlencoded({ extended: true })); // support urlencoded bodies
 app.use(cookieParser());
@@ -180,7 +167,7 @@ app.post('/update', [cors(corsOptions), bodyParser.json()], function (
   const data = request.body;
   // Update enquiries saved in orders table - remove deleted, save orders that have been 'read'
   truncateTable(null, function (err, res) {
-    if (err) return response.send(error);
+    if (err) return response.send(err);
     if (res) {
       updateEnquiries(null, data, function (error, result) {
         if (error) return response.send(error);
@@ -226,17 +213,7 @@ app.post('/register', bodyParser.json(), function (req, res) {
       res.status(500).send('Error registering new user please try again.');
     } else {
       // Store email and password hash
-      pool
-        .query('INSERT INTO users(email, password)VALUES($1, $2)', [
-          email,
-          hash,
-        ])
-        .then(res.status(200).send('Welcome to the club!'))
-        .catch((err) =>
-          setImmediate(() => {
-            throw err;
-          })
-        );
+      registerUser(email, hash);
     }
   });
 });
@@ -273,21 +250,13 @@ app.post('/api/authenticate', [cors(corsOptions), bodyParser.json()], function (
       }
     });
   }
-  pool
-    .query('SELECT password FROM users WHERE email = $1', [email])
-    .then((result) => {
-      if (result.rows.length === 0) {
-        console.log('Incorrect email address');
-        res.status(401).json({ error: 'Incorrect email or password' });
-      } else {
-        hash = result.rows[0].password;
-        comparePassword(password, hash);
-      }
-    })
-    .catch((e) => {
-      console.error(e.stack);
-      res.status(500).json({ error: 'Internal error please try again' });
-    });
+  getPassword(err, email, function (err, result) {
+    if (err) {
+      res.status(401).json({ error: 'Incorrect email or password' });
+    } else {
+      comparePassword(password, result);
+    }
+  });
 });
 
 const PORT = process.env.PORT || 4242;
