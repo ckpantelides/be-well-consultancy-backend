@@ -31,8 +31,6 @@ showOrders: (callback) => {
   },
   updateEnquiries: (error, array, callback) => {
     if (error) return callback(error);
-    pool
-      .query('TRUNCATE TABLE orders');
     array.forEach(el => { 
     pool
       .query(
@@ -57,6 +55,13 @@ showOrders: (callback) => {
       )
     });
     return callback(null,true);
+   },
+   truncateTable: (err,callback) => {
+    if (err) return callback(error);
+    pool
+      .query('TRUNCATE TABLE orders')
+      .then( () => { return callback(null,true) })
+      .catch((err) => { return callback(err)});
    },
    insertNewOrder: (customerDetails,cardDetails,paymentIntentID) => {
     pool

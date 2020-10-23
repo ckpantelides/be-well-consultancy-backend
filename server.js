@@ -19,7 +19,7 @@ const cookieParser = require('cookie-parser');
 const withAuth = require('./middleware'); // Checks token from user is valid
 
 // helper functions
-const { showOrders, updateEnquiries, insertNewOrder, confirmPaid } = require('./helpers/database.js');
+const { showOrders, truncateTable, updateEnquiries, insertNewOrder, confirmPaid } = require('./helpers/database.js');
 const { calculateOrderAmount } = require('./helpers/util.js');
 
 // pg is the module used for node to interact with postgresql
@@ -44,17 +44,6 @@ app.use(cookieParser());
 const endpointSecret = process.env.webhookSecret;
 
 let whitelist = ['https://ckpantelides.github.io']
-var corsOptions2 = {
-  origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS'))
-    }
-  },
-  credentials: true,
-  method: 'GET,POST'
-}
 
 let corsOptions = {
   origin: function (origin, callback) {
@@ -81,7 +70,6 @@ app.options('/api/authenticate', cors(corsOptions));
 app.options('/api/secret', cors(corsOptions)); 
 app.options('/api/checkToken', cors(corsOptions));
 app.options('/orders', cors(corsOptions)); 
-
 
 // Pre-flight requests for payment and TEMPORARILY register & update allowed from all origins
 app.options('/create-payment-intent', cors());
@@ -169,10 +157,15 @@ app.post('/update', [cors(corsOptions2),bodyParser.json()], function (request, r
    // set data to the updated enquiries received from the frontend
   const data = request.body;
   // Update enquiries saved in orders table - remove deleted, save orders that have been 'read'
+  truncateTable(null, function(err,res) {
+    if (err) return response.send(error);
+    if (res) {
   updateEnquiries(null, data, function(error,result) {
     if (error) return response.send(error);
     if (result) return response.send(200);
   });
+}
+});
 });
 
 // Test route for admin login
