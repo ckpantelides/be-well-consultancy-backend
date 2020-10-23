@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const { resolve } = require('path');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
@@ -19,7 +20,7 @@ const withAuth = require('./middleware'); // Checks token from user is valid
 
 // helper functions
 const { showOrders, updateEnquiries, insertNewOrder, confirmPaid } = require('./helpers/database.js');
-const { calculateOrderAmount, corsOptions } = require('./helpers/util.js');
+const { calculateOrderAmount } = require('./helpers/util.js');
 
 // pg is the module used for node to interact with postgresql
 let pg = require('pg');
@@ -42,6 +43,35 @@ app.use(cookieParser());
 // Stripe webhook secret
 const endpointSecret = process.env.webhookSecret;
 
+let whitelist = ['https://ckpantelides.github.io']
+var corsOptions2 = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
+  credentials: true,
+  method: 'GET,POST'
+}
+
+let corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
+  methods: 'DELETE, POST, GET, OPTIONS, PUT',
+  allowedHeaders: 'Content-Type,Authorization,X-Requested-With',
+  credentials: true,
+  optionsSuccessStatus: 200,
+  exposedHeaders:  'Content-Range,X-Content-Range',
+  preflightContinue: true,
+}
+
 app.use(express.static('.'));
 
 // Pre-flight requests for api routes from whitelist only
@@ -51,6 +81,7 @@ app.options('/api/authenticate', cors(corsOptions));
 app.options('/api/secret', cors(corsOptions)); 
 app.options('/api/checkToken', cors(corsOptions));
 app.options('/orders', cors(corsOptions)); 
+
 
 // Pre-flight requests for payment and TEMPORARILY register & update allowed from all origins
 app.options('/create-payment-intent', cors());
