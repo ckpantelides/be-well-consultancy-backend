@@ -19,7 +19,13 @@ const cookieParser = require('cookie-parser');
 const withAuth = require('./middleware'); // Checks token from user is valid
 
 // helper functions
-const { showOrders, truncateTable, updateEnquiries, insertNewOrder, confirmPaid } = require('./helpers/database.js');
+const {
+  showOrders,
+  truncateTable,
+  updateEnquiries,
+  insertNewOrder,
+  confirmPaid,
+} = require('./helpers/database.js');
 const { calculateOrderAmount } = require('./helpers/util.js');
 
 // pg is the module used for node to interact with postgresql
@@ -43,33 +49,37 @@ app.use(cookieParser());
 // Stripe webhook secret
 const endpointSecret = process.env.webhookSecret;
 
-let whitelist = ['https://ckpantelides.github.io']
+let whitelist = ['https://ckpantelides.github.io'];
 
 let corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true)
+      callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'))
+      callback(new Error('Not allowed by CORS'));
     }
   },
   methods: 'DELETE, POST, GET, OPTIONS, PUT',
   allowedHeaders: 'Content-Type,Authorization,X-Requested-With',
   credentials: true,
   optionsSuccessStatus: 200,
-  exposedHeaders:  'Content-Range,X-Content-Range',
+  exposedHeaders: 'Content-Range,X-Content-Range',
   preflightContinue: true,
-}
+};
 
 app.use(express.static('.'));
 
 // Pre-flight requests for api routes from whitelist only
-app.options('/update', [cors(corsOptions), bodyParser.json()], function (req, res) {
-  res.sendStatus(200)}); 
+app.options('/update', [cors(corsOptions), bodyParser.json()], function (
+  req,
+  res
+) {
+  res.sendStatus(200);
+});
 app.options('/api/authenticate', cors(corsOptions));
-app.options('/api/secret', cors(corsOptions)); 
+app.options('/api/secret', cors(corsOptions));
 app.options('/api/checkToken', cors(corsOptions));
-app.options('/orders', cors(corsOptions)); 
+app.options('/orders', cors(corsOptions));
 
 // Pre-flight requests for payment and TEMPORARILY register & update allowed from all origins
 app.options('/create-payment-intent', cors());
@@ -83,7 +93,6 @@ app.get('/create-payment-intent', cors(), (req, res) =>
 );
 
 app.post('/create-payment-intent', cors(), async (req, res) => {
-
   let data = Object.keys(req.body);
   let customerDetails = JSON.parse(data[0]);
   let cardDetails = JSON.parse(data[1]);
@@ -105,83 +114,107 @@ app.post('/create-payment-intent', cors(), async (req, res) => {
 });
 
 // Webhook route confirms with Stripe that a payment intent succeeded
-app.post('/webhook', [cors(), bodyParser.raw({type: 'application/json'})], (request, response) => {
-  let event;
-  try {
-    event = JSON.parse(request.body);
-    //event = request.body;
-  } catch (err) {
-    console.log(`⚠️  Webhook error while parsing basic request.`, err.message);
-    return response.send();
-  }
-  // Only verify the event if you have an endpoint secret defined.
-  // Otherwise use the basic event deserialized with JSON.parse
-  if (endpointSecret) {
-    // Get the signature sent by Stripe
-    const signature = request.headers['stripe-signature'];
+app.post(
+  '/webhook',
+  [cors(), bodyParser.raw({ type: 'application/json' })],
+  (request, response) => {
+    let event;
     try {
-      event = stripe.webhooks.constructEvent(
-        request.body,
-        signature,
-        endpointSecret
-      );
+      event = JSON.parse(request.body);
+      //event = request.body;
     } catch (err) {
-      console.log(`⚠️  Webhook signature verification failed.`, err.message);
-      return response.send(200);
+      console.log(
+        `⚠️  Webhook error while parsing basic request.`,
+        err.message
+      );
+      return response.send();
     }
+    // Only verify the event if you have an endpoint secret defined.
+    // Otherwise use the basic event deserialized with JSON.parse
+    if (endpointSecret) {
+      // Get the signature sent by Stripe
+      const signature = request.headers['stripe-signature'];
+      try {
+        event = stripe.webhooks.constructEvent(
+          request.body,
+          signature,
+          endpointSecret
+        );
+      } catch (err) {
+        console.log(`⚠️  Webhook signature verification failed.`, err.message);
+        return response.send(200);
+      }
+    }
+    // Handle the event
+    switch (event.type) {
+      case 'payment_intent.succeeded':
+        const paymentIntent = event.data.object;
+        // Add paid: 'true' to the order in the orders table
+        confirmPaid(paymentIntent.id);
+        break;
+      default:
+        // Unexpected event type
+        console.log(`Unhandled event type ${event.type}.`);
+    }
+    // Return a 200 response to acknowledge receipt of the event
+    response.send();
   }
-  // Handle the event
-  switch (event.type) {
-    case 'payment_intent.succeeded':
-    const paymentIntent = event.data.object;
-    // Add paid: 'true' to the order in the orders table
-    confirmPaid(paymentIntent.id);
-    break;
-    default:
-      // Unexpected event type
-      console.log(`Unhandled event type ${event.type}.`);
-  }
-  // Return a 200 response to acknowledge receipt of the event
-  response.send();
-});
+);
 
 // This route is called to show the orders to the dashboard
-app.get('/orders', [cors(corsOptions), withAuth, bodyParser.json()], function (request, response) {
-    showOrders(function(error, data){
+app.get('/orders', [cors(corsOptions), withAuth, bodyParser.json()], function (
+  request,
+  response
+) {
+  showOrders(function (error, data) {
     if (error) return response.send(error);
     response.status(200).send(data);
-  }); 
+  });
 });
 
-app.post('/update', [cors(corsOptions2),bodyParser.json()], function (request, response) {
-   // set data to the updated enquiries received from the frontend
+app.post('/update', [cors(corsOptions), bodyParser.json()], function (
+  request,
+  response
+) {
+  // set data to the updated enquiries received from the frontend
   const data = request.body;
   // Update enquiries saved in orders table - remove deleted, save orders that have been 'read'
-  truncateTable(null, function(err,res) {
+  truncateTable(null, function (err, res) {
     if (err) return response.send(error);
     if (res) {
-  updateEnquiries(null, data, function(error,result) {
-    if (error) return response.send(error);
-    if (result) return response.send(200);
+      updateEnquiries(null, data, function (error, result) {
+        if (error) return response.send(error);
+        if (result) return response.send(200);
+      });
+    }
   });
-}
-});
 });
 
 // Test route for admin login
-app.get('/api/home', [cors(corsOptions), bodyParser.json()], function (req, res) {
+app.get('/api/home', [cors(corsOptions), bodyParser.json()], function (
+  req,
+  res
+) {
   res.send("The server's up and running");
 });
 
 // Test route for admin login
-app.get('/api/secret', [cors(corsOptions), withAuth, bodyParser.json()], function (req, res) {
-  res.send('Christos is the best');
-});
+app.get(
+  '/api/secret',
+  [cors(corsOptions), withAuth, bodyParser.json()],
+  function (req, res) {
+    res.send('Christos is the best');
+  }
+);
 
 // Route for the front-end to check it has a valid token
-app.get('/api/checkToken', [cors(corsOptions), withAuth, bodyParser.json()], function(req, res) {
-  res.sendStatus(200);
-});
+app.get(
+  '/api/checkToken',
+  [cors(corsOptions), withAuth, bodyParser.json()],
+  function (req, res) {
+    res.sendStatus(200);
+  }
+);
 
 // POST route to register a user
 app.post('/register', bodyParser.json(), function (req, res) {
@@ -208,7 +241,10 @@ app.post('/register', bodyParser.json(), function (req, res) {
   });
 });
 
-app.post('/api/authenticate', [cors(corsOptions), bodyParser.json()], function (req, res) {
+app.post('/api/authenticate', [cors(corsOptions), bodyParser.json()], function (
+  req,
+  res
+) {
   const { email, password } = req.body;
   let hash = '';
 
@@ -216,17 +252,24 @@ app.post('/api/authenticate', [cors(corsOptions), bodyParser.json()], function (
     bcrypt.compare(plaintext, hashedword, function (err, same) {
       if (err) {
         console.log('Error with bcrypt');
-        res.status(500).json({ error: 'Internal error please try again'});
+        res.status(500).json({ error: 'Internal error please try again' });
       } else if (!same) {
         console.log('Incorrect password');
-        res.status(401).json({ error: 'Incorrect email or password'});
+        res.status(401).json({ error: 'Incorrect email or password' });
       } else {
         // Issue token
         const payload = { email };
         const token = jwt.sign(payload, JWTsecret, {
           expiresIn: '1h',
         });
-        res.cookie('token', token, { httpOnly: true, sameSite: 'none', secure: true }).status(200).send('Token issued');
+        res
+          .cookie('token', token, {
+            httpOnly: true,
+            sameSite: 'none',
+            secure: true,
+          })
+          .status(200)
+          .send('Token issued');
       }
     });
   }
@@ -235,7 +278,7 @@ app.post('/api/authenticate', [cors(corsOptions), bodyParser.json()], function (
     .then((result) => {
       if (result.rows.length === 0) {
         console.log('Incorrect email address');
-        res.status(401).json({ error: 'Incorrect email or password'});
+        res.status(401).json({ error: 'Incorrect email or password' });
       } else {
         hash = result.rows[0].password;
         comparePassword(password, hash);
@@ -243,7 +286,7 @@ app.post('/api/authenticate', [cors(corsOptions), bodyParser.json()], function (
     })
     .catch((e) => {
       console.error(e.stack);
-      res.status(500).json({ error: 'Internal error please try again'});
+      res.status(500).json({ error: 'Internal error please try again' });
     });
 });
 
