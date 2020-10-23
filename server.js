@@ -19,7 +19,7 @@ const cookieParser = require('cookie-parser');
 const withAuth = require('./middleware'); // Checks token from user is valid
 
 // helper functions
-const { showOrders, updateEnquiries, insertNewOrder } = require('./helpers/database.js');
+const { showOrders, updateEnquiries, insertNewOrder, confirmPaid } = require('./helpers/database.js');
 const { calculateOrderAmount } = require('./helpers/util.js');
 
 // pg is the module used for node to interact with postgresql
@@ -27,9 +27,7 @@ let pg = require('pg');
 if (process.env.DATABASE_URL) {
   pg.defaults.ssl = true;
 }
-
-// pool is used instead of client to connect to postgresql (client kept returning errors)
-// c.f. npm 'pg' documentation recommends pools. No need to call pool.end() - the pool can be left open
+// pool is used to connect to postgresql. No need to call pool.end() - the pool can be left open
 let connString = process.env.DATABASE_URL;
 const { Pool } = require('pg');
 const pool = new Pool({
@@ -39,7 +37,6 @@ const pool = new Pool({
   },
 });
 
-//app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support urlencoded bodies
 app.use(cookieParser());
 
@@ -76,7 +73,6 @@ let corsOptions = {
 }
 
 app.use(express.static('.'));
-//app.use(express.json());
 
 // Pre-flight requests for api routes from whitelist only
 app.options('/update', [cors(corsOptions), bodyParser.json()], function (req, res) {
@@ -116,8 +112,6 @@ app.post('/create-payment-intent', cors(), async (req, res) => {
 
   // insert the order into the order table. "Paid" will be set as false, and updated once
   // confirmation is received from Stripe via webhook
-  // The story is split after the third space in its title
-
   //TODO catch error here?
   insertNewOrder(customerDetails, cardDetails, paymentIntent.id);
 });
@@ -151,21 +145,10 @@ app.post('/webhook', [cors(), bodyParser.raw({type: 'application/json'})], (requ
   // Handle the event
   switch (event.type) {
     case 'payment_intent.succeeded':
-      const paymentIntent = event.data.object;
-  
-      pool
-      .query('UPDATE orders SET paid=($1) WHERE paymentintentid=($2)',['true', paymentIntent.id])
-      .then(response.status(200).send('Order marked as paid'))
-      .catch((err) =>
-        setImmediate(() => {
-          throw err;
-        })
-      );
-      break;
-    case 'payment_method.attached':
-      const paymentMethod = event.data.object;
-      // Then define and call a method to handle the successful attachment of a PaymentMethod.
-      break;
+    const paymentIntent = event.data.object;
+    // Add paid: 'true' to the order in the orders table
+    confirmPaid(paymentIntent.id);
+    break;
     default:
       // Unexpected event type
       console.log(`Unhandled event type ${event.type}.`);
@@ -185,9 +168,7 @@ app.get('/orders', [cors(corsOptions), withAuth, bodyParser.json()], function (r
 app.post('/update', [cors(corsOptions2),bodyParser.json()], function (request, response) {
    // set data to the updated enquiries received from the frontend
   const data = request.body;
-  
-   // deletes all rows from the requests table and then calls updateEnquiries()
-   // this is necessary to reset the rowids, to account for deleted enquiries
+  // Update enquiries saved in orders table - remove deleted, save orders that have been 'read'
   updateEnquiries(null, data, function(error,result) {
     if (error) return response.send(error);
     if (result) return response.send(200);

@@ -86,5 +86,12 @@ showOrders: (callback) => {
        throw err;
      })
    );
-    }
+    },
+    confirmPaid: (paymentIntentID) => {pool
+    .query('UPDATE orders SET paid=($1) WHERE paymentintentid=($2)',['true', paymentIntentID])
+    .catch((err) =>
+      setImmediate(() => {
+        throw err;
+      })
+    ); }
 }
