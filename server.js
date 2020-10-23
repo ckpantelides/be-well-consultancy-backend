@@ -250,10 +250,11 @@ app.post('/api/authenticate', [cors(corsOptions), bodyParser.json()], function (
       }
     });
   }
-  getPassword(err, email, function (err, result) {
-    if (err) {
+  getPassword(error, email, function (err, result) {
+    if (error) {
       res.status(401).json({ error: 'Incorrect email or password' });
     } else {
+      if (err) return res.status(401).json({ error: 'Incorrect email or password' });
       comparePassword(password, result);
     }
   });
