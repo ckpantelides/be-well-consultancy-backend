@@ -18,6 +18,9 @@ const JWTsecret = process.env.JWTsecret;
 const cookieParser = require('cookie-parser');
 const withAuth = require('./middleware'); // Checks token from user is valid
 
+// Used to generate order IDs
+const shortid = require('shortid');
+
 // helper functions
 const {
   showOrders,
@@ -85,6 +88,7 @@ app.post('/create-payment-intent', cors(), async (req, res) => {
   let cardDetails = JSON.parse(data[1]);
 
   // TODO inform user of orderid. Collect billing address
+  let orderID = shortid.generate();
 
   const paymentIntent = await stripe.paymentIntents.create({
     amount: calculateOrderAmount(customerDetails.type),
@@ -92,12 +96,14 @@ app.post('/create-payment-intent', cors(), async (req, res) => {
   });
   res.send({
     clientSecret: paymentIntent.client_secret,
+    orderID: orderID
   });
 
   // insert the order into the order table. "Paid" will be set as false, and updated once
   // confirmation is received from Stripe via webhook
   //TODO catch error here?
-  insertNewOrder(customerDetails, cardDetails, paymentIntent.id);
+ 
+  insertNewOrder(customerDetails, cardDetails, paymentIntent.id, orderID);
 });
 
 // Webhook route confirms with Stripe that a payment intent succeeded

@@ -13,9 +13,6 @@ const pool = new Pool({
   },
 });
 
-// Used to generate order IDs
-const shortid = require('shortid');
-
 module.exports = {
   showOrders: (callback) => {
     pool.query(
@@ -66,12 +63,12 @@ module.exports = {
         return callback(err);
       });
   },
-  insertNewOrder: (customerDetails, cardDetails, paymentIntentID) => {
+  insertNewOrder: (customerDetails, cardDetails, paymentIntentID, orderID) => {
     pool
       .query(
         'INSERT INTO orders(orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)',
         [
-          shortid.generate(),
+          orderID,
           new Date().toISOString().slice(0, 10),
           customerDetails.delName,
           cardDetails.email,
