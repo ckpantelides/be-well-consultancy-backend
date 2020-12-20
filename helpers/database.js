@@ -16,7 +16,7 @@ const pool = new Pool({
 module.exports = {
   showOrders: (callback) => {
     pool.query(
-      'SELECT rowid, orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read FROM orders ORDER BY rowid',
+      'SELECT rowid, orderid, date, deliveryname, email, deliveryaddress, deliverypostcode, type, story, charname, avatar, brand, last4, paymentintentid, billingname, billingaddress, billingpostcode, paid, read FROM orders ORDER BY rowid',
       (err, res) => {
         if (err) {
           return callback(err);
@@ -30,14 +30,14 @@ module.exports = {
     if (error) return callback(error);
     array.forEach((el) => {
       pool.query(
-        'INSERT INTO orders(orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)',
+        'INSERT INTO orders(orderid, date, deliveryname, email, deliveryaddress, deliverypostcode, type, story, charname, avatar, brand, last4, paymentintentid, billingname, billingaddress, billingpostcode, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)',
         [
           el.orderid,
           el.data,
-          el.delname,
+          el.deliveryname,
           el.email,
-          el.address,
-          el.postcode,
+          el.deliveryaddress,
+          el.deliverypostcode,
           el.type,
           el.story,
           el.charname,
@@ -45,6 +45,9 @@ module.exports = {
           el.brand,
           el.last4,
           el.paymentintentid,
+          el.billingname,
+          el.billingaddress,
+          el.billingpostcode,
           el.paid,
           el.read,
         ]
@@ -66,14 +69,14 @@ module.exports = {
   insertNewOrder: (customerDetails, cardDetails, paymentIntentID, orderID) => {
     pool
       .query(
-        'INSERT INTO orders(orderid, date, delname, email, address, postcode, type, story, charname, avatar, brand, last4, paymentintentid, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)',
+        'INSERT INTO orders(orderid, date, deliveryname, email, deliveryaddress, deliverypostcode, type, story, charname, avatar, brand, last4, paymentintentid, billingname, billingaddress, billingpostcode, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)',
         [
           orderID,
           new Date().toISOString().slice(0, 10),
-          customerDetails.delName,
+          customerDetails.deliveryName,
           cardDetails.email,
-          customerDetails.address,
-          customerDetails.postcode,
+          customerDetails.deliveryAddress,
+          customerDetails.deliveryPostcode,
           customerDetails.type,
           customerDetails.story.match(/(.*?\s){3}/g)[0],
           customerDetails.charName,
@@ -81,6 +84,9 @@ module.exports = {
           cardDetails.brand,
           cardDetails.last4,
           paymentIntentID,
+          customerDetails.billingName,
+          customerDetails.billingAddress,
+          customerDetails.billingPostcode,
           'false',
           'false',
         ]
