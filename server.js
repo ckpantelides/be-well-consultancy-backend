@@ -87,8 +87,7 @@ app.post('/create-payment-intent', cors(), async (req, res) => {
   let customerDetails = JSON.parse(data[0]);
   let cardDetails = JSON.parse(data[1]);
 
-  // TODO inform user of orderid. Collect billing address
-  let orderID = shortid.generate();
+  let orderID = shortid.generate().substring(0, 6);
 
   const paymentIntent = await stripe.paymentIntents.create({
     amount: calculateOrderAmount(customerDetails.type),
