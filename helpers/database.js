@@ -78,7 +78,7 @@ module.exports = {
           customerDetails.deliveryAddress,
           customerDetails.deliveryPostcode,
           customerDetails.type,
-          customerDetails.story.match(/(.*?\s){3}/g)[0],
+          customerDetails.story,
           customerDetails.charName,
           customerDetails.avatar,
           cardDetails.brand,
