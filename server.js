@@ -84,6 +84,8 @@ app.get('/create-payment-intent', cors(), (req, res) =>
 
 app.post('/create-payment-intent', cors(), async (req, res) => {
   let data = Object.keys(req.body);
+  console.log(req);
+  console.log(data);
   let customerDetails = JSON.parse(data[0]);
   let cardDetails = JSON.parse(data[1]);
 
