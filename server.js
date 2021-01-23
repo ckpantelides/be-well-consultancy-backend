@@ -83,16 +83,18 @@ app.get('/create-payment-intent', cors(), (req, res) =>
 );
 
 app.post('/create-payment-intent', cors(), async (req, res) => {
+  /*
   let data = Object.keys(req.body);
   console.log(req);
   console.log(data);
   let customerDetails = JSON.parse(data[0]);
   let cardDetails = JSON.parse(data[1]);
-
+  */
   let orderID = shortid.generate().substring(0, 6);
 
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: calculateOrderAmount(customerDetails.type),
+  //  amount: calculateOrderAmount(customerDetails.type),
+    amount: 2400,
     currency: 'gbp',
   });
   res.send({
