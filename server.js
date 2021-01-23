@@ -96,6 +96,7 @@ app.post('/create-payment-intent', cors(), async (req, res) => {
   //  amount: calculateOrderAmount(customerDetails.type),
     amount: 2400,
     currency: 'gbp',
+    payment_method_types: ['card']
   });
   res.send({
     clientSecret: paymentIntent.client_secret,
