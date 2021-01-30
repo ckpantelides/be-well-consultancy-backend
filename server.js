@@ -94,7 +94,7 @@ app.post('/create-payment-intent', cors(), async (req, res) => {
 
   const paymentIntent = await stripe.paymentIntents.create({
   //  amount: calculateOrderAmount(customerDetails.type),
-    amount: 2400,
+    amount: 100,
     currency: 'gbp',
     payment_method_types: ['card']
   });
