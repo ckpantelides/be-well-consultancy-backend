@@ -17,6 +17,7 @@
     "jsonwebtoken": "^8.5.1",
     "pg": "^8.3.3",
     "shortid": "^2.2.15",
-    "stripe": "^8.69.0"
+    "stripe": "^8.69.0",
+    "validator": "^13.5.2"
   }
 }
