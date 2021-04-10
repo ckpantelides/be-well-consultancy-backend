@@ -1,11 +1,11 @@
 // pool is used instead of client to connect to postgresql (client kept returning errors)
 // c.f. npm 'pg' documentation recommends pools. No need to call pool.end() - the pool can be left open
-let pg = require('pg');
+let pg = require("pg");
 if (process.env.DATABASE_URL) {
   pg.defaults.ssl = true;
 }
 let connString = process.env.DATABASE_URL;
-const { Pool } = require('pg');
+const { Pool } = require("pg");
 const pool = new Pool({
   connectionString: connString,
   ssl: {
@@ -16,7 +16,7 @@ const pool = new Pool({
 module.exports = {
   showOrders: (callback) => {
     pool.query(
-      'SELECT rowid, orderid, date, deliveryname, email, deliveryaddress, deliverypostcode, type, story, charname, avatar, last4, paymentintentid, billingname, billingaddress, billingpostcode, paid, read FROM orders ORDER BY rowid',
+      "SELECT rowid, orderid, date, deliveryname, email, deliveryaddress, deliverypostcode, type, story, charname, avatar, last4, paymentintentid, billingname, billingaddress, billingpostcode, paid, read FROM orders ORDER BY rowid",
       (err, res) => {
         if (err) {
           return callback(err);
@@ -30,7 +30,7 @@ module.exports = {
     if (error) return callback(error);
     array.forEach((el) => {
       pool.query(
-        'INSERT INTO orders(orderid, date, deliveryname, email, deliveryaddress, deliverypostcode, type, story, charname, avatar, last4, paymentintentid, billingname, billingaddress, billingpostcode, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)',
+        "INSERT INTO orders(orderid, date, deliveryname, email, deliveryaddress, deliverypostcode, type, story, charname, avatar, last4, paymentintentid, billingname, billingaddress, billingpostcode, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)",
         [
           el.orderid,
           el.data,
@@ -57,7 +57,7 @@ module.exports = {
   truncateTable: (err, callback) => {
     if (err) return callback(error);
     pool
-      .query('TRUNCATE TABLE orders')
+      .query("TRUNCATE TABLE orders")
       .then(() => {
         return callback(null, true);
       })
@@ -68,7 +68,7 @@ module.exports = {
   insertNewOrder: (customerDetails, cardDetails, paymentIntentID, orderID) => {
     pool
       .query(
-        'INSERT INTO orders(orderid, date, deliveryname, email, deliveryaddress, deliverypostcode, type, story, charname, avatar, last4, paymentintentid, billingname, billingaddress, billingpostcode, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)',
+        "INSERT INTO orders(orderid, date, deliveryname, email, deliveryaddress, deliverypostcode, type, story, charname, avatar, last4, paymentintentid, billingname, billingaddress, billingpostcode, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)",
         [
           orderID,
           new Date().toISOString().slice(0, 10),
@@ -85,11 +85,11 @@ module.exports = {
           customerDetails.billingName,
           customerDetails.billingAddress,
           customerDetails.billingPostcode,
-          'false',
-          'false',
+          "false",
+          "false",
         ]
       )
-      .then(console.log('Order inserted into database'))
+      .then(console.log("Order inserted into database"))
       .catch((err) =>
         setImmediate(() => {
           throw err;
@@ -98,8 +98,8 @@ module.exports = {
   },
   confirmPaid: (paymentIntentID) => {
     pool
-      .query('UPDATE orders SET paid=($1) WHERE paymentintentid=($2)', [
-        'true',
+      .query("UPDATE orders SET paid=($1) WHERE paymentintentid=($2)", [
+        "true",
         paymentIntentID,
       ])
       .catch((err) =>
@@ -110,8 +110,8 @@ module.exports = {
   },
   registerUser: (email, hash) => {
     pool
-      .query('INSERT INTO users(email, password)VALUES($1, $2)', [email, hash])
-      .then(console.log('Welcome to the club!'))
+      .query("INSERT INTO users(email, password)VALUES($1, $2)", [email, hash])
+      .then(console.log("Welcome to the club!"))
       .catch((err) =>
         setImmediate(() => {
           throw err;
@@ -120,7 +120,7 @@ module.exports = {
   },
   getPassword: (err, email, callback) => {
     pool
-      .query('SELECT password FROM users WHERE email = $1', [email])
+      .query("SELECT password FROM users WHERE email = $1", [email])
       .then((result) => {
         if (result.rows.length === 0) {
           callback(err);

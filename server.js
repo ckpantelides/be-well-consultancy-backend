@@ -31,9 +31,9 @@ const {
   updateEnquiries,
   insertNewOrder,
   confirmPaid,
-  registerUser,
   getPassword,
 } = require("./helpers/database.js");
+const { emailInvoice } = require("./helpers/db-async");
 const { calculateOrderAmount } = require("./helpers/util.js");
 
 app.use(bodyParser.urlencoded({ extended: true })); // support urlencoded bodies
@@ -122,10 +122,10 @@ app.post("/create-payment-intent", cors(), async (req, res) => {
   }
   if (!validator.isAlphanumeric(customerDetails.avatar)) {
     returnValidatorError("Error with chosen avatar");
-  } 
+  }
   if (!validator.isAlphanumeric(cardDetails.last4)) {
     returnValidatorError("Error with card number");
-  } 
+  }
   if (!validator.matches(customerDetails.billingName, nameRegex)) {
     returnValidatorError("Error: billing name has invalid character");
   }
@@ -159,7 +159,7 @@ app.post("/create-payment-intent", cors(), async (req, res) => {
 app.post(
   "/webhook",
   [cors(), bodyParser.raw({ type: "application/json" })],
-  (request, response) => {
+  async (request, response) => {
     let event;
     try {
       event = JSON.parse(request.body);
@@ -193,6 +193,9 @@ app.post(
         const paymentIntent = event.data.object;
         // Add paid: 'true' to the order in the orders table
         confirmPaid(paymentIntent.id);
+        // Send email invoice
+        await emailInvoice(paymentIntent.id)
+
         break;
       default:
         // Unexpected event type
