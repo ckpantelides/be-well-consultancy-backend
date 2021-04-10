@@ -261,21 +261,6 @@ app.get(
   }
 );
 
-// POST route to register a user
-app.post("/register", bodyParser.json(), function (req, res) {
-  const { email, password } = req.body;
-
-  // Auto generates salt and hash
-  bcrypt.hash(password, saltRounds, function (err, hash) {
-    if (err) {
-      res.status(500).send("Error registering new user please try again.");
-    } else {
-      // Store email and password hash
-      registerUser(email, hash);
-    }
-  });
-});
-
 app.post(
   "/api/authenticate",
   [cors(corsOptions), bodyParser.json()],
