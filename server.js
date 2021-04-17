@@ -60,6 +60,23 @@ let corsOptions = {
   preflightContinue: true,
 };
 
+const whitelistContactForm = ["https://vivlioltd.com", "https://vivlioltd.com/#contact"];
+const corsContactForm = {
+  origin: function (origin, callback) {
+    if (whitelistContactForm.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: "DELETE, POST, GET, OPTIONS, PUT",
+  allowedHeaders: "Content-Type,Authorization,X-Requested-With",
+  credentials: true,
+  optionsSuccessStatus: 200,
+  exposedHeaders: "Content-Range,X-Content-Range",
+  preflightContinue: true,
+};
+
 app.use(express.static("."));
 
 // Pre-flight requests for api routes from whitelist only
@@ -74,6 +91,7 @@ app.options("/api/authenticate", cors(corsOptions));
 app.options("/api/secret", cors(corsOptions));
 app.options("/api/checkToken", cors(corsOptions));
 app.options("/orders", cors(corsOptions));
+app.options("/contact-form", cors(corsContactForm))
 
 // Pre-flight requests for payment and TEMPORARILY register & update allowed from all origins
 app.options("/create-payment-intent", cors());
@@ -86,8 +104,8 @@ app.get("/create-payment-intent", cors(), (req, res) =>
   res.send("Create payment intent")
 );
 
-const addressRegex = /^[a-zA-Z0-9,\/ -]*$/;
-const nameRegex = /^[a-zA-Z '-]*$/;
+const addressRegex = /^[a-zA-Z0-9,\/\s-]*$/;
+const nameRegex = /^[a-zA-Z\s'-]*$/;
 
 app.post("/create-payment-intent", cors(), async (req, res) => {
   const data = Object.keys(req.body);
@@ -303,6 +321,37 @@ app.post(
         comparePassword(password, result);
       }
     });
+  }
+);
+
+
+// Webhook route confirms with Stripe that a payment intent succeeded
+app.post(
+  "/contact-form",
+  [cors(corsContactForm), express.json()],
+ (request, response) => {
+   const contact = request.body;
+   console.log(contact)
+
+   const sgMail = require("@sendgrid/mail");
+
+   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+   const msg = {
+     to: [process.env.TO_CC_EMAIL, process.env.TO_CC_EMAIL_2, process.env.FROM_CONTACT_EMAIL], 
+     from: process.env.FROM_CONTACT_EMAIL,
+     subject: 'Contact form message from VivlioLtd.com',
+     text: `${contact.name} at ${contact.email} says: ${contact.message}`,
+     html: `${contact.name} at ${contact.email} says:<br /><br />${contact.message}`
+   };
+   sgMail
+     .send(msg)
+     .then(() => {
+       console.log("Email sent");
+     })
+     .catch((error) => {
+       console.error(error);
+     });
+    response.sendStatus(200);
   }
 );
 

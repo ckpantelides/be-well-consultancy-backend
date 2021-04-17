@@ -24,7 +24,7 @@ async function emailInvoice(paymentIntentID) {
       const order = res.rows[0];
       sgMail.setApiKey(process.env.SENDGRID_API_KEY);
       const msg = {
-        to: [process.env.TO_CC_EMAIL, order.email], 
+        to: [process.env.TO_CC_EMAIL, order.email, process.env.TO_CC_EMAIL_2], 
         from: process.env.FROM_CONTACT_EMAIL,
         templateId: 'd-6851a120c8a647899067111e29e297f4',
         dynamicTemplateData: {
