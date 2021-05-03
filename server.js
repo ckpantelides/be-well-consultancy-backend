@@ -337,7 +337,8 @@ app.post(
 
    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
    const msg = {
-     to: [process.env.TO_CC_EMAIL, process.env.TO_CC_EMAIL_2, process.env.FROM_CONTACT_EMAIL], 
+     to: [process.env.FROM_CONTACT_EMAIL], 
+     bcc: [process.env.TO_CC_EMAIL, process.env.TO_CC_EMAIL_2],
      from: process.env.FROM_CONTACT_EMAIL,
      subject: 'Contact form message from VivlioLtd.com',
      text: `${contact.name} at ${contact.email} says: ${contact.message}`,

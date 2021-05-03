@@ -24,23 +24,28 @@ async function emailInvoice(paymentIntentID) {
       const order = res.rows[0];
       sgMail.setApiKey(process.env.SENDGRID_API_KEY);
       const msg = {
-        to: [process.env.TO_CC_EMAIL, order.email, process.env.TO_CC_EMAIL_2], 
+        to: [order.email],
+        bcc: [
+          process.env.TO_CC_EMAIL,
+          process.env.TO_CC_EMAIL_2,
+          process.env.FROM_CONTACT_EMAIL,
+        ],
         from: process.env.FROM_CONTACT_EMAIL,
-        templateId: 'd-6851a120c8a647899067111e29e297f4',
+        templateId: "d-6851a120c8a647899067111e29e297f4",
         dynamicTemplateData: {
-            Order_Number: order.orderid,
-            Story: order.story,
-            Hero_Name: order.charname,
-            Type: order.type,
-            Delivery_Name: order.deliveryname,
-            Delivery_Address: `${order.deliveryaddress} ${order.deliverypostcode}`,
-            Amound_Paid: order.type === "paperback" ? "£16.98" : "£24.98",
-            Card_Ending: order.last4,
-            Billing_Name: order.billingname,
-            Billing_Address: `${order.billingaddress}  ${order.billingpostcode}`,
-            Sender_Name: "Vivlio Ltd",
-            Sender_Address: "www.vivlioltd.com"
-        }
+          Order_Number: order.orderid,
+          Story: order.story,
+          Hero_Name: order.charname,
+          Type: order.type,
+          Delivery_Name: order.deliveryname,
+          Delivery_Address: `${order.deliveryaddress} ${order.deliverypostcode}`,
+          Amound_Paid: order.type === "paperback" ? "£16.98" : "£24.98",
+          Card_Ending: order.last4,
+          Billing_Name: order.billingname,
+          Billing_Address: `${order.billingaddress}  ${order.billingpostcode}`,
+          Sender_Name: "Vivlio Ltd",
+          Sender_Address: "www.vivlioltd.com",
+        },
       };
       sgMail
         .send(msg)
