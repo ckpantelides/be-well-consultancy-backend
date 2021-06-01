@@ -17,7 +17,7 @@ const pool = new Pool({
 async function emailInvoice(paymentIntentID) {
   pool
     .query(
-      "SELECT rowid, orderid, date, deliveryname, email, deliveryaddress, deliverypostcode, type, story, charname, avatar, last4, paymentintentid, billingname, billingaddress, billingpostcode, paid, read FROM orders WHERE paymentintentid= $1",
+      "SELECT rowid, orderid, date, deliveryname, email, deliveryaddress, deliverypostcode, type, story, charname, avatar, paymentintentid, billingname, billingaddress, billingpostcode, paid, read FROM orders WHERE paymentintentid= $1",
       [paymentIntentID]
     )
     .then((res) => {
@@ -40,7 +40,7 @@ async function emailInvoice(paymentIntentID) {
           Delivery_Name: order.deliveryname,
           Delivery_Address: `${order.deliveryaddress} ${order.deliverypostcode}`,
           Amound_Paid: order.type === "paperback" ? "£16.98" : "£24.98",
-          Card_Ending: order.last4,
+          Card_Ending: "",
           Billing_Name: order.billingname,
           Billing_Address: `${order.billingaddress}  ${order.billingpostcode}`,
           Sender_Name: "Vivlio Ltd",

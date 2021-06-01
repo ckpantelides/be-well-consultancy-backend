@@ -141,9 +141,6 @@ app.post("/create-payment-intent", cors(), async (req, res) => {
   if (!validator.isAlphanumeric(customerDetails.avatar)) {
     returnValidatorError("Error with chosen avatar");
   }
-  if (!validator.isAlphanumeric(cardDetails.last4)) {
-    returnValidatorError("Error with card number");
-  }
   if (!validator.matches(customerDetails.billingName, nameRegex)) {
     returnValidatorError("Error: billing name has invalid character");
   }

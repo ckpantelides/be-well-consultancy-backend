@@ -16,7 +16,7 @@ const pool = new Pool({
 module.exports = {
   showOrders: (callback) => {
     pool.query(
-      "SELECT rowid, orderid, date, deliveryname, email, deliveryaddress, deliverypostcode, type, story, charname, avatar, last4, paymentintentid, billingname, billingaddress, billingpostcode, paid, read FROM orders ORDER BY rowid",
+      "SELECT rowid, orderid, date, deliveryname, email, deliveryaddress, deliverypostcode, type, story, charname, avatar, paymentintentid, billingname, billingaddress, billingpostcode, paid, read FROM orders ORDER BY rowid",
       (err, res) => {
         if (err) {
           return callback(err);
@@ -30,7 +30,7 @@ module.exports = {
     if (error) return callback(error);
     array.forEach((el) => {
       pool.query(
-        "INSERT INTO orders(orderid, date, deliveryname, email, deliveryaddress, deliverypostcode, type, story, charname, avatar, last4, paymentintentid, billingname, billingaddress, billingpostcode, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)",
+        "INSERT INTO orders(orderid, date, deliveryname, email, deliveryaddress, deliverypostcode, type, story, charname, avatar, paymentintentid, billingname, billingaddress, billingpostcode, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)",
         [
           el.orderid,
           el.data,
@@ -42,7 +42,6 @@ module.exports = {
           el.story,
           el.charname,
           el.avatar,
-          el.last4,
           el.paymentintentid,
           el.billingname,
           el.billingaddress,
@@ -68,7 +67,7 @@ module.exports = {
   insertNewOrder: (customerDetails, cardDetails, paymentIntentID, orderID) => {
     pool
       .query(
-        "INSERT INTO orders(orderid, date, deliveryname, email, deliveryaddress, deliverypostcode, type, story, charname, avatar, last4, paymentintentid, billingname, billingaddress, billingpostcode, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)",
+        "INSERT INTO orders(orderid, date, deliveryname, email, deliveryaddress, deliverypostcode, type, story, charname, avatar, paymentintentid, billingname, billingaddress, billingpostcode, paid, read)VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)",
         [
           orderID,
           new Date().toISOString().slice(0, 10),
@@ -80,7 +79,6 @@ module.exports = {
           customerDetails.story,
           customerDetails.charName,
           customerDetails.avatar,
-          cardDetails.last4,
           paymentIntentID,
           customerDetails.billingName,
           customerDetails.billingAddress,
