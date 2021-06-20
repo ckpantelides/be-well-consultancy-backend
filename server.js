@@ -159,7 +159,8 @@ app.post("/create-payment-intent", cors(), async (req, res) => {
       currency: "gbp",
       payment_method_types: ["card"],
     })
-    .catch(() => {
+    .catch((err) => {
+      console.log(err.message)
       return res.status(400).send("Error with our payment partner, Stripe");
     });
   res.send({
