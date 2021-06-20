@@ -1,3 +1,6 @@
+Hardback price: 2498
+Paperback price: 1698
+
 Adding a postgresql database to a heroku hosted project:
 
 npm install pg
