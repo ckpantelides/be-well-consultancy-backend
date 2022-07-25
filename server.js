@@ -7,7 +7,7 @@ const bodyParser = require("body-parser");
 
 app.use(bodyParser.urlencoded({ extended: true })); // support urlencoded bodies
  
-const whitelistContactForm = ["https://bewellconsultancy.com", "https://bewellconsultancy.com/#contact"];
+const whitelistContactForm = ["https://bewellconsultancy.com", "https://bewellconsultancy.com/#contact", "https://bewellconsultancy.com/founder", "https://bewellconsultancy.com/therapy"];
 const corsContactForm = {
   origin: function (origin, callback) {
     if (whitelistContactForm.indexOf(origin) !== -1) {
