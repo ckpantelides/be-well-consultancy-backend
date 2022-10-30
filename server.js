@@ -72,7 +72,6 @@ app.post(
     // Send auto acknowledgment email to contact
     const autoAcknowledgmentEmail = {
       to: [contact.email],
-      bcc: [process.env.FROM_CONTACT_EMAIL],
       from: process.env.FROM_CONTACT_EMAIL,
       templateId: "d-bd05b929be81420abd481d78988e1f51",
     };
