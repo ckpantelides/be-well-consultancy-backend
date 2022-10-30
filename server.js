@@ -55,8 +55,8 @@ app.post(
       to: [process.env.FROM_CONTACT_EMAIL],
       from: process.env.FROM_CONTACT_EMAIL,
       subject: "Contact form message from Be Well Consultancy",
-      text: `${contact.name} at ${contact.email} says: ${contact.message}`,
-      html: `${contact.name} at ${contact.email} says:<br /><br />${contact.message}`,
+      text: `${contact.name} ${contact.phone} at ${contact.email} says: ${contact.message}`,
+      html: `${contact.name} ${contact.phone} at ${contact.email} says:<br /><br />${contact.message}`,
     };
     sgMail
       .send(msg)
